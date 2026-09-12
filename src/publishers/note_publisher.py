@@ -53,21 +53,17 @@ def is_logged_in(context) -> bool:
         return False
 
 
-def login(page: Page, email: str, password: str) -> None:
-    """メールアドレスとパスワードで note にログインする"""
-    page.goto(f"{NOTE_BASE_URL}/login", wait_until="networkidle", timeout=60000)
-    _wait(2)
-    page.fill('input[name="login"], input[autocomplete="username"], input[type="email"]', email)
-    _wait(0.5)
-    page.fill('input[name="password"], input[type="password"]', password)
-    _wait(0.5)
-    # 「Googleでログイン」等を誤って押さないよう、文言が完全一致のボタンだけを押す
-    page.get_by_role("button", name="ログイン", exact=True).click(timeout=10000)
-    for _ in range(20):
-        _wait(1)
-        if is_logged_in(page.context):
-            return
-    raise RuntimeError("note への自動ログインに失敗しました（画面構成の変更や追加認証の可能性があります）")
+def persist_session(state: dict) -> None:
+    """アクセスで延長されたセッションを保存する。
+
+    note のセッション Cookie は約3か月有効で、アクセスのたびに期限が延びる。
+    Actions では暗号化ファイル（ワークフローがコミット）、ローカルでは note_session.json を更新する。
+    """
+    if session_store.save_encrypted(state):
+        logger.info("セッションを暗号化して保存しました（有効期限を延長）")
+    if not os.environ.get("GITHUB_ACTIONS"):
+        SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
+        SESSION_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 class NotePublisher:
@@ -134,20 +130,17 @@ class NotePublisher:
         return json.loads(SESSION_FILE.read_text(encoding="utf-8"))
 
     def _verify_session(self, page: Page):
-        """ログイン状態を確認し、切れていればメールアドレスで再ログインして暗号化保存する"""
-        if is_logged_in(page.context):
-            logger.info("セッション有効 - ログイン済み")
-            return
-        email, password = os.environ.get("NOTE_EMAIL"), os.environ.get("NOTE_PASSWORD")
-        if not (email and password):
+        """ログイン状態を確認し、延長されたセッションを保存する。
+
+        note のログイン画面には reCAPTCHA があるため、自動でのパスワードログインは行わない。
+        """
+        if not is_logged_in(page.context):
             raise RuntimeError(
-                "note のセッションが切れています。NOTE_EMAIL / NOTE_PASSWORD を設定するか、"
-                "setup_note_session.py を再実行してください"
+                "note のセッションが切れています。ローカルで python scripts/setup_note_session.py を実行して"
+                "ログインし直してください（GitHub への反映も同じスクリプトで行えます）"
             )
-        logger.warning("セッションが切れているため、メールアドレスで再ログインします")
-        login(page, email, password)
-        if session_store.save_encrypted(page.context.storage_state()):
-            logger.info("新しいセッションを暗号化して保存しました")
+        logger.info("セッション有効 - ログイン済み")
+        persist_session(page.context.storage_state())
 
     def _create_paid_article(self, page, title, teaser, paid, price, cover_image_path, hashtags) -> str:
         logger.info(f"記事作成開始: {title}")

@@ -1,4 +1,4 @@
-"""note.com セッション初期化（初回のみ・手動ログイン）
+"""note.com セッション初期化・再ログイン（手動）
 
 PowerShell などから実行してください:
 
@@ -6,27 +6,40 @@ PowerShell などから実行してください:
   python scripts/setup_note_session.py
 
 ブラウザが開くので、宝くじ用の note アカウントでログインし、ターミナルで Enter を押します。
-ログインできているかを確認してから保存します（未ログインなら保存せずにやり直せます）。
+ログインできているかを確認してから保存します。続けて GitHub（自動投稿）への反映も行えます：
+新しい暗号化キーを Secret SESSION_KEY に登録し、暗号化したセッションを data/session/ にコミットして push します。
 """
 
 import json
+import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.publishers.note_publisher import SESSION_FILE
+from src.publishers import session_store
+from src.publishers.note_publisher import SESSION_FILE, is_logged_in
+
+REPO = "harypary/takarakuzi-auto"
 
 
-def _current_user(context):
-    """ログイン中ならユーザー情報、未ログインなら None"""
-    resp = context.request.get("https://note.com/api/v2/current_user")
-    if resp.status != 200:
-        return None
+def push_to_github(state: dict) -> None:
+    key = session_store.generate_key()
+    session_store.save_encrypted(state, key)
+    path = str(session_store.ENCRYPTED_FILE)
     try:
-        return resp.json().get("data") or None
-    except Exception:
-        return None
+        subprocess.run(["git", "add", path], check=True)
+        subprocess.run(["git", "commit", "-m", "session: 手動ログインで更新"], check=True)
+        subprocess.run(["git", "pull", "--rebase"], check=True)
+        subprocess.run(["git", "push"], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"ERROR: git への反映に失敗しました（{e}）。Secret は更新していません。")
+        return
+    result = subprocess.run(["gh", "secret", "set", "SESSION_KEY", "-R", REPO], input=key, text=True, capture_output=True)
+    if result.returncode != 0:
+        print(f"ERROR: SESSION_KEY の登録に失敗しました: {result.stderr.strip()}")
+        return
+    print("GitHub（自動投稿）に新しいセッションを反映しました")
 
 
 def main():
@@ -50,16 +63,21 @@ def main():
                 print("中止しました。セッションは保存していません。")
                 browser.close()
                 return
-            user = _current_user(context)
-            if user:
+            if is_logged_in(context):
                 break
             print("まだログインが確認できません。ブラウザでログインを完了してから、もう一度 Enter を押してください。")
 
+        user = context.request.get("https://note.com/api/v2/current_user").json().get("data") or {}
         state = context.storage_state()
-        SESSION_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
-        print(f"ログイン確認OK: {user.get('nickname')}（note.com/{user.get('urlname')}）")
-        print(f"セッション保存完了: {SESSION_FILE}（Cookie {len(state.get('cookies', []))}件）")
         browser.close()
+
+    SESSION_FILE.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"ログイン確認OK: {user.get('nickname')}（note.com/{user.get('urlname')}）")
+    print(f"セッション保存完了: {SESSION_FILE}（Cookie {len(state.get('cookies', []))}件）")
+
+    answer = input("GitHub（自動投稿）にもこのセッションを反映しますか？ [Y/n] >>> ")
+    if answer.strip().lower() in ("", "y", "yes"):
+        push_to_github(state)
 
 
 if __name__ == "__main__":
