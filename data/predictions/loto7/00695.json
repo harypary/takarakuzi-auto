@@ -1,0 +1,198 @@
+{
+ "game": "loto7",
+ "draw": 695,
+ "date": "2026-09-18",
+ "weights": {
+  "hot": 0.2136,
+  "trend": 0.1359,
+  "cold": 0.2063,
+  "carry": 0.0971,
+  "slide": 0.1201,
+  "koyomi": 0.2269
+ },
+ "koyomi": {
+  "date": "2026-09-18",
+  "month": 9,
+  "day": 18,
+  "mmdd": "0918",
+  "kanshi": "乙未",
+  "kyusei": 8,
+  "kyusei_name": "八白土星",
+  "kyusei_gogyo": "土",
+  "day_gogyo": "木",
+  "relation": "相剋",
+  "relation_text": "五行がぶつかり合う、波のある配置",
+  "rokuyo": "先負",
+  "setsu_month_name": "酉月（白露〜）",
+  "lucky_days": [],
+  "numerology": 1,
+  "numerology_root": 1,
+  "lucky_digits": [
+   1,
+   3,
+   8
+  ]
+ },
+ "picks": [
+  {
+   "tier": "本命",
+   "numbers": [
+    2,
+    8,
+    12,
+    19,
+    23,
+    35,
+    36
+   ],
+   "score": 0.3963,
+   "sum": 135,
+   "odd": 3
+  },
+  {
+   "tier": "本命",
+   "numbers": [
+    1,
+    2,
+    6,
+    18,
+    19,
+    25,
+    35
+   ],
+   "score": 0.391,
+   "sum": 106,
+   "odd": 4
+  },
+  {
+   "tier": "本命",
+   "numbers": [
+    1,
+    8,
+    17,
+    18,
+    23,
+    31,
+    35
+   ],
+   "score": 0.3832,
+   "sum": 133,
+   "odd": 5
+  },
+  {
+   "tier": "本命",
+   "numbers": [
+    12,
+    18,
+    19,
+    22,
+    24,
+    32,
+    35
+   ],
+   "score": 0.382,
+   "sum": 162,
+   "odd": 2
+  },
+  {
+   "tier": "対抗",
+   "numbers": [
+    8,
+    10,
+    11,
+    18,
+    19,
+    28,
+    35
+   ],
+   "score": 0.3779,
+   "sum": 129,
+   "odd": 3
+  },
+  {
+   "tier": "対抗",
+   "numbers": [
+    1,
+    3,
+    8,
+    19,
+    22,
+    28,
+    31
+   ],
+   "score": 0.3676,
+   "sum": 112,
+   "odd": 4
+  },
+  {
+   "tier": "対抗",
+   "numbers": [
+    1,
+    8,
+    11,
+    12,
+    20,
+    23,
+    28
+   ],
+   "score": 0.3568,
+   "sum": 103,
+   "odd": 3
+  },
+  {
+   "tier": "穴",
+   "numbers": [
+    1,
+    2,
+    6,
+    11,
+    12,
+    32,
+    37
+   ],
+   "score": 0.4511,
+   "sum": 101,
+   "odd": 3
+  },
+  {
+   "tier": "穴",
+   "numbers": [
+    5,
+    6,
+    11,
+    12,
+    23,
+    29,
+    34
+   ],
+   "score": 0.4173,
+   "sum": 120,
+   "odd": 4
+  },
+  {
+   "tier": "穴",
+   "numbers": [
+    2,
+    6,
+    11,
+    14,
+    21,
+    24,
+    28
+   ],
+   "score": 0.3951,
+   "sum": 106,
+   "odd": 2
+  }
+ ],
+ "axis": [
+  19,
+  23,
+  35
+ ],
+ "post": {
+  "series": "loto7",
+  "url": "https://note.com/takarakuziuranai/n/n3ee59c1a69bc",
+  "posted_at": "2026-09-13T05:53:16+09:00"
+ }
+}

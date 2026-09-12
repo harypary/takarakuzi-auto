@@ -7,6 +7,7 @@ import base64
 import json
 import os
 import random
+import re
 import time
 from pathlib import Path
 from typing import Optional
@@ -26,6 +27,15 @@ MAX_HASHTAGS = 10
 
 def _wait(seconds: float):
     time.sleep(seconds + random.uniform(0, 0.5))
+
+
+def _paid_anchor(teaser: str, paid: str) -> str:
+    """有料部分の先頭を見分けるための、無料部分に含まれない最初の行"""
+    for line in paid.splitlines():
+        line = line.strip()
+        if line and not re.fullmatch(r"[━─=\-\s]+", line) and line not in teaser:
+            return line
+    raise ValueError("有料部分の先頭行を特定できません")
 
 
 class NotePublisher:
@@ -107,7 +117,7 @@ class NotePublisher:
             self._upload_cover(page, cover_image_path)
             _wait(3)
 
-        self._fill_body(page, teaser, paid)
+        anchor = self._fill_body(page, teaser, paid)
         _wait(2)
 
         page.click('button:has-text("公開に進む")', timeout=8000)
@@ -126,9 +136,24 @@ class NotePublisher:
         page.click('button:has-text("投稿する")', timeout=8000)
         _wait(8)
 
-        url = page.url
-        logger.info(f"投稿完了: {url}")
-        return url
+        return self._verify_published(page, anchor)
+
+    def _verify_published(self, page: Page, anchor: str) -> str:
+        """公開後に API で状態と有料エリアの位置を確認し、公開URLを返す"""
+        match = re.search(r"notes/(n[0-9a-z]+)", page.url)
+        if not match:
+            raise RuntimeError(f"投稿後のURLから記事IDを取得できません: {page.url}")
+        key = match.group(1)
+        data = page.request.get(f"{NOTE_BASE_URL}/api/v3/notes/{key}").json().get("data") or {}
+        public_url = f"{NOTE_BASE_URL}/{(data.get('user') or {}).get('urlname')}/n/{key}"
+        if data.get("status") != "published":
+            raise RuntimeError(f"記事が公開状態になっていません（status={data.get('status')}）: {public_url}")
+        body, separator = data.get("body") or "", data.get("separator") or ""
+        cut = body.find(separator) if separator else -1
+        if cut < 0 or anchor in re.sub(r"<[^>]+>", "", body[:cut]):
+            raise RuntimeError(f"公開後の確認で有料部分が無料側に含まれています。すぐに記事を非公開にしてください: {public_url}")
+        logger.info(f"投稿完了（有料エリアの位置を確認済み）: {public_url}")
+        return public_url
 
     def _fill_title(self, page: Page, title: str):
         for sel in ('textarea[placeholder*="タイトル"]', 'input[placeholder*="タイトル"]', '[data-placeholder*="タイトル"]'):
@@ -147,8 +172,24 @@ class NotePublisher:
             file_inputs = page.query_selector_all('input[type="file"]')
             if file_inputs:
                 file_inputs[0].set_input_files(image_path)
-            else:
-                logger.warning("カバー画像の入力欄が見つかりません")
+                return
+            # 新エディタ：画像追加ボタン → ファイル選択 → トリミングダイアログで確定
+            for sel in ('[aria-label="画像を追加"]', 'button:has-text("画像を追加")', '[aria-label*="見出し画像"]'):
+                button = page.query_selector(sel)
+                if not button:
+                    continue
+                with page.expect_file_chooser(timeout=8000) as chooser:
+                    button.click(timeout=5000, force=True)
+                chooser.value.set_files(image_path)
+                _wait(2)
+                for confirm in ('[role="dialog"] button:has-text("保存")', '[role="dialog"] button:has-text("適用")'):
+                    try:
+                        page.click(confirm, timeout=3000)
+                        break
+                    except Exception:
+                        continue
+                return
+            logger.warning("カバー画像の入力欄が見つかりません（画像なしで続行）")
         except Exception as e:
             logger.warning(f"カバー画像アップロード失敗（スキップ）: {e}")
 
@@ -168,14 +209,13 @@ class NotePublisher:
             logger.warning("本文エリアが見つかりません")
         _wait(0.5)
 
-        self._paste(page, teaser)
-        _wait(0.5)
-
-        self._insert_paid_boundary(page)
-        _wait(1)
-
-        self._paste(page, paid)
+        # 無料部分と有料部分をまとめて貼り付けてから、境界に有料エリア線を入れる。
+        # 線を先に入れるとカーソルが線の手前に残り、有料部分が無料側に入ってしまう。
+        anchor = _paid_anchor(teaser, paid)
+        self._paste(page, f"{teaser}\n\n{paid}")
         _wait(2)
+        self._insert_paid_boundary(page, anchor)
+        return anchor
 
     def _paste(self, page: Page, text: str):
         """本文エディタに貼り付ける。
@@ -204,20 +244,61 @@ class NotePublisher:
         _wait(0.3)
         page.keyboard.press("Control+v")
 
-    def _insert_paid_boundary(self, page: Page):
-        """本文の「メニューを開く」(+) → 「有料エリア指定」で区切り線を入れる"""
-        page.keyboard.press("Control+End")
+    def _insert_paid_boundary(self, page: Page, anchor: str):
+        """無料部分の最後のブロックをクリック → 「メニューを開く」(+) → 「有料エリア指定」。
+        線はクリックしたブロックの直後に入る。入れた後、位置が正しいかを検証する。"""
+        index = page.evaluate(
+            """(anchor) => {
+                const blocks = [...document.querySelectorAll('.ProseMirror > *')];
+                let i = blocks.findIndex(b => (b.innerText || '').includes(anchor));
+                if (i <= 0) return -1;
+                while (i > 1 && /^[━─\\s]*$/.test(blocks[i - 1].innerText || '')) i--;
+                return i - 1;
+            }""",
+            anchor,
+        )
+        if index < 0:
+            raise RuntimeError("有料部分の先頭が本文中に見つかりません")
+        last_free = page.locator(".ProseMirror > *").nth(index)
+        last_free.click()
+        _wait(0.3)
+        last_free.hover()
         _wait(0.5)
-        page.hover(".ProseMirror > *:last-child", timeout=5000)
-        _wait(0.4)
         page.click('[aria-label="メニューを開く"]', timeout=5000)
         _wait(0.5)
         page.click("text=有料エリア指定", timeout=5000)
-        _wait(1.0)
+        _wait(1.5)
+
+        result = page.evaluate(
+            """(anchor) => {
+                const lines = document.querySelectorAll('.ProseMirror > paywall-line');
+                if (lines.length !== 1) return 'paywall-line が' + lines.length + '個';
+                let next = lines[0].nextElementSibling;
+                while (next && /^[━─\\s]*$/.test(next.innerText || '')) next = next.nextElementSibling;
+                if (!next || !(next.innerText || '').includes(anchor)) return '線の直後が有料部分の先頭ではありません';
+                return 'ok';
+            }""",
+            anchor,
+        )
+        if result != "ok":
+            raise RuntimeError(f"有料エリア線の位置が想定と違うため投稿を中止します（{result}）")
+        logger.info("有料エリア線の位置を確認しました")
 
     def _set_price(self, page: Page, price: int):
+        if page.get_by_text("本人情報の登録").first.is_visible():
+            raise RuntimeError(
+                "note の本人情報（氏名・住所）が未登録のため有料記事を設定できません。"
+                "ブラウザで note にログインし、本人情報を登録してから再実行してください。"
+            )
         loc = page.locator("#price").first
-        loc.wait_for(state="visible", timeout=5000)
+        if not loc.is_visible():
+            # 記事タイプで「有料」を選ぶと価格欄が出る画面構成に対応
+            try:
+                page.get_by_text("有料", exact=True).first.click(timeout=3000)
+                _wait(1)
+            except Exception:
+                pass
+        loc.wait_for(state="visible", timeout=8000)
         loc.click(click_count=3)
         _wait(0.3)
         loc.fill(str(price))
