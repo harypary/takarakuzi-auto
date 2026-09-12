@@ -15,6 +15,7 @@ from typing import Optional
 from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 
 from src.config import OUTPUT_DIR
+from src.publishers import session_store
 from src.utils.logger import get_logger
 
 logger = get_logger("note_publisher")
@@ -23,6 +24,10 @@ NOTE_BASE_URL = "https://note.com"
 NOTE_NEW_ARTICLE_URL = f"{NOTE_BASE_URL}/notes/new"
 SESSION_FILE = OUTPUT_DIR / "note_session.json"
 MAX_HASHTAGS = 10
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
 
 
 def _wait(seconds: float):
@@ -36,6 +41,32 @@ def _paid_anchor(teaser: str, paid: str) -> str:
         if line and not re.fullmatch(r"[━─=\-\s]+", line) and line not in teaser:
             return line
     raise ValueError("有料部分の先頭行を特定できません")
+
+
+def is_logged_in(context) -> bool:
+    resp = context.request.get(f"{NOTE_BASE_URL}/api/v2/current_user")
+    if resp.status != 200:
+        return False
+    try:
+        return bool(resp.json().get("data"))
+    except Exception:
+        return False
+
+
+def login(page: Page, email: str, password: str) -> None:
+    """メールアドレスとパスワードで note にログインする"""
+    page.goto(f"{NOTE_BASE_URL}/login", wait_until="networkidle", timeout=60000)
+    _wait(2)
+    page.fill('input[name="email"], input[type="email"], #email', email)
+    _wait(0.5)
+    page.fill('input[name="password"], input[type="password"]', password)
+    _wait(0.5)
+    page.click('button[type="submit"], button:has-text("ログイン")')
+    for _ in range(20):
+        _wait(1)
+        if is_logged_in(page.context):
+            return
+    raise RuntimeError("note への自動ログインに失敗しました（画面構成の変更や追加認証の可能性があります）")
 
 
 class NotePublisher:
@@ -85,6 +116,10 @@ class NotePublisher:
                 browser.close()
 
     def _load_session(self) -> dict:
+        state = session_store.load_encrypted()
+        if state:
+            logger.info("リポジトリの暗号化セッションを読み込みました")
+            return state
         session_b64 = os.environ.get("NOTE_SESSION_B64")
         if session_b64:
             logger.info("環境変数からセッションを読み込みました")
@@ -98,12 +133,20 @@ class NotePublisher:
         return json.loads(SESSION_FILE.read_text(encoding="utf-8"))
 
     def _verify_session(self, page: Page):
-        page.goto(NOTE_BASE_URL, wait_until="networkidle", timeout=30000)
-        _wait(2)
-        if page.query_selector('[data-testid="user-icon"], .o-header__userIcon, a[href*="/settings"]'):
+        """ログイン状態を確認し、切れていればメールアドレスで再ログインして暗号化保存する"""
+        if is_logged_in(page.context):
             logger.info("セッション有効 - ログイン済み")
-        else:
-            logger.warning("ログイン状態を確認できません。失敗する場合は setup_note_session.py を再実行してください")
+            return
+        email, password = os.environ.get("NOTE_EMAIL"), os.environ.get("NOTE_PASSWORD")
+        if not (email and password):
+            raise RuntimeError(
+                "note のセッションが切れています。NOTE_EMAIL / NOTE_PASSWORD を設定するか、"
+                "setup_note_session.py を再実行してください"
+            )
+        logger.warning("セッションが切れているため、メールアドレスで再ログインします")
+        login(page, email, password)
+        if session_store.save_encrypted(page.context.storage_state()):
+            logger.info("新しいセッションを暗号化して保存しました")
 
     def _create_paid_article(self, page, title, teaser, paid, price, cover_image_path, hashtags) -> str:
         logger.info(f"記事作成開始: {title}")
