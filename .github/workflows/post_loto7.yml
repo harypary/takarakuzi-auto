@@ -1,0 +1,26 @@
+name: ロト7予想 投稿（水 21:00 JST・金曜抽せん分）
+
+on:
+  schedule:
+    - cron: '0 12 * * 3'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（生成のみ・投稿しない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: takarakuzi-data
+  cancel-in-progress: false
+
+jobs:
+  post:
+    uses: ./.github/workflows/_post.yml
+    with:
+      series: loto7
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit

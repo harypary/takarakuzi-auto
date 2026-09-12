@@ -1,0 +1,12 @@
+.env
+*.env
+output/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.vscode/
+.idea/
+Thumbs.db
+.claude/settings.local.json

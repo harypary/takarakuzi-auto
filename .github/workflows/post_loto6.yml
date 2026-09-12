@@ -1,0 +1,27 @@
+name: ロト6予想 投稿（火・土 21:00 JST）
+
+on:
+  schedule:
+    # 土曜 → 月曜抽せん分、火曜 → 木曜抽せん分
+    - cron: '0 12 * * 2,6'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（生成のみ・投稿しない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: takarakuzi-data
+  cancel-in-progress: false
+
+jobs:
+  post:
+    uses: ./.github/workflows/_post.yml
+    with:
+      series: loto6
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit

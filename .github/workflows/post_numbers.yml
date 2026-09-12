@@ -1,0 +1,26 @@
+name: ナンバーズ3・4予想 投稿（日〜木 21:30 JST・翌日抽せん分）
+
+on:
+  schedule:
+    - cron: '30 12 * * 0-4'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（生成のみ・投稿しない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: takarakuzi-data
+  cancel-in-progress: false
+
+jobs:
+  post:
+    uses: ./.github/workflows/_post.yml
+    with:
+      series: numbers
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit

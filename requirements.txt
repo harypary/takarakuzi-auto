@@ -1,0 +1,19 @@
+# AI 文章生成（任意。キーが無ければテンプレート文）
+google-genai>=1.0.0
+
+# note.com 投稿
+playwright>=1.49.0
+
+# 画像生成
+Pillow>=10.0.0
+
+# 旧暦（六曜）
+lunardate>=0.2.0
+
+# 環境変数
+python-dotenv>=1.0.1
+
+# GitHub Secret 暗号化（セッション自動更新）
+PyNaCl>=1.5.0
+
+pytest>=8.0.0
