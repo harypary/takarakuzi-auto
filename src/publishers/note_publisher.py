@@ -173,23 +173,24 @@ class NotePublisher:
             if file_inputs:
                 file_inputs[0].set_input_files(image_path)
                 return
-            # 新エディタ：画像追加ボタン → ファイル選択 → トリミングダイアログで確定
-            for sel in ('[aria-label="画像を追加"]', 'button:has-text("画像を追加")', '[aria-label*="見出し画像"]'):
-                button = page.query_selector(sel)
-                if not button:
-                    continue
-                with page.expect_file_chooser(timeout=8000) as chooser:
-                    button.click(timeout=5000, force=True)
-                chooser.value.set_files(image_path)
-                _wait(2)
-                for confirm in ('[role="dialog"] button:has-text("保存")', '[role="dialog"] button:has-text("適用")'):
-                    try:
-                        page.click(confirm, timeout=3000)
-                        break
-                    except Exception:
-                        continue
+            # 新エディタ：「画像を追加」→ メニューの「画像をアップロード」→ ファイル選択
+            #            → 「画像のサイズの変更」ダイアログで「保存」
+            add_button = page.locator('button:has([aria-label="画像を追加"])').first
+            if not add_button.count():
+                logger.warning("カバー画像の追加ボタンが見つかりません（画像なしで続行）")
                 return
-            logger.warning("カバー画像の入力欄が見つかりません（画像なしで続行）")
+            add_button.click(force=True, timeout=5000)
+            _wait(1)
+            with page.expect_file_chooser(timeout=8000) as chooser:
+                page.locator('button:has-text("画像をアップロード")').first.click(timeout=5000)
+            chooser.value.set_files(image_path)
+            _wait(3)
+            page.locator('[role="dialog"] button:has-text("保存")').first.click(timeout=8000)
+            try:
+                page.wait_for_selector('img[src*="/uploads/images/"]', state="attached", timeout=15000)
+                logger.info("カバー画像を設定しました")
+            except Exception:
+                logger.warning("カバー画像のアップロード完了を確認できませんでした（続行）")
         except Exception as e:
             logger.warning(f"カバー画像アップロード失敗（スキップ）: {e}")
 
