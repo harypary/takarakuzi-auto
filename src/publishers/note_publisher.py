@@ -57,11 +57,12 @@ def login(page: Page, email: str, password: str) -> None:
     """メールアドレスとパスワードで note にログインする"""
     page.goto(f"{NOTE_BASE_URL}/login", wait_until="networkidle", timeout=60000)
     _wait(2)
-    page.fill('input[name="email"], input[type="email"], #email', email)
+    page.fill('input[name="login"], input[autocomplete="username"], input[type="email"]', email)
     _wait(0.5)
     page.fill('input[name="password"], input[type="password"]', password)
     _wait(0.5)
-    page.click('button[type="submit"], button:has-text("ログイン")')
+    # 「Googleでログイン」等を誤って押さないよう、文言が完全一致のボタンだけを押す
+    page.get_by_role("button", name="ログイン", exact=True).click(timeout=10000)
     for _ in range(20):
         _wait(1)
         if is_logged_in(page.context):
