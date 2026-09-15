@@ -26,7 +26,7 @@ from src.data.fetcher import load_results, update_results
 from src.pipeline import is_posted, prediction_record, prepare_game
 from src.predict.store import save_prediction
 from src.publishers.cover import generate_cover
-from src.utils.dates import latest_draw_date, next_draw_date, now_jst, to_date
+from src.utils.dates import base_date, latest_draw_date, next_draw_date, now_jst, to_date
 from src.utils.logger import get_logger
 
 logger = get_logger("run_post")
@@ -69,7 +69,8 @@ def main():
 
     series = SERIES[args.series]
     now = now_jst()
-    today = date.fromisoformat(args.today) if args.today else now.date()
+    # 定時実行の遅れ（翌未明にずれ込むこと）があっても予定どおりの回を対象にする
+    today = date.fromisoformat(args.today) if args.today else base_date(now)
     persist = not args.dry_run
 
     results = {}

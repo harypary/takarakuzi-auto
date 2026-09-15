@@ -1,8 +1,11 @@
-name: ナンバーズ3・4予想 投稿（日〜木 21:30 JST・翌日抽せん分）
+name: ナンバーズ3・4予想 投稿（日〜木 21:37 JST・翌日抽せん分）
 
 on:
   schedule:
-    - cron: '30 12 * * 0-4'
+    # 定時実行は遅れることがあるため、混雑しやすい :00/:30 を避け、約2時間後に予備の実行を置く。
+    # 予備の実行は、投稿済みならスキップされる。
+    - cron: '37 12 * * 0-4'
+    - cron: '47 14 * * 0-4'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -14,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: takarakuzi-data
+  group: takarakuzi-post-numbers
   cancel-in-progress: false
 
 jobs:

@@ -1,9 +1,11 @@
-name: ロト6予想 投稿（火・土 21:00 JST）
+name: ロト6予想 投稿（火・土 21:07 JST）
 
 on:
   schedule:
-    # 土曜 → 月曜抽せん分、火曜 → 木曜抽せん分
-    - cron: '0 12 * * 2,6'
+    # 土曜 → 月曜抽せん分、火曜 → 木曜抽せん分。
+    # 定時実行は遅れることがあるため、:00 を避け、約2時間後に予備の実行を置く（投稿済みならスキップ）。
+    - cron: '7 12 * * 2,6'
+    - cron: '17 14 * * 2,6'
   workflow_dispatch:
     inputs:
       dry_run:
@@ -15,7 +17,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: takarakuzi-data
+  group: takarakuzi-post-loto6
   cancel-in-progress: false
 
 jobs:

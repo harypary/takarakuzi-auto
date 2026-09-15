@@ -11,6 +11,12 @@ def now_jst() -> datetime:
     return datetime.now(JST)
 
 
+def base_date(now: datetime) -> date:
+    """記事の基準日。GitHub Actions の定時実行は数時間遅れることがあるため、
+    12時間さかのぼった日付を「今日」とみなす（21時台の予定が翌未明に動いても狙いの回を外さない）。"""
+    return (now - timedelta(hours=12)).date()
+
+
 def to_date(value) -> date:
     return date.fromisoformat(value) if isinstance(value, str) else value
 
