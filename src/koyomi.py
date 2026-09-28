@@ -10,7 +10,7 @@ import math
 from datetime import date, timedelta
 from functools import lru_cache
 
-from lunardate import LunarDate
+from src.kyureki import ROKUYO, rokuyo  # noqa: F401  （他モジュールからの参照用に再エクスポート）
 
 JIKKAN = "甲乙丙丁戊己庚辛壬癸"
 JUNISHI = "子丑寅卯辰巳午未申酉戌亥"
@@ -20,7 +20,6 @@ KAN_GOGYO = "木木火火土土金金水水"
 # 河図の数（五行ごとの数字）
 GOGYO_DIGITS = {"水": (1, 6), "火": (2, 7), "木": (3, 8), "金": (4, 9), "土": (5, 0)}
 SOJO = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}  # A が B を生む
-ROKUYO = ["大安", "赤口", "先勝", "友引", "先負", "仏滅"]
 SETSU_NAMES = ["立春", "啓蟄", "清明", "立夏", "芒種", "小暑", "立秋", "白露", "寒露", "立冬", "大雪", "小寒"]
 SETSU_BRANCHES = "寅卯辰巳午未申酉戌亥子丑"
 # 一粒万倍日: 節月（寅月=0）ごとの日の十二支
@@ -87,12 +86,6 @@ def kyusei_day(d: date) -> int:
     start, mode = max((s for s in starts if s[0] <= d), key=lambda s: s[0])
     k = (d - start).days % 9
     return k + 1 if mode == "yo" else 9 - k
-
-
-def rokuyo(d: date) -> str:
-    to_lunar = getattr(LunarDate, "from_solar_date", None) or LunarDate.fromSolarDate
-    ld = to_lunar(d.year, d.month, d.day)
-    return ROKUYO[(ld.month + ld.day) % 6]
 
 
 def digital_root(n: int) -> int:

@@ -30,6 +30,40 @@ def _font(size: int, bold: bool = False):
     return ImageFont.load_default()
 
 
+def generate_jumbo_cover(name: str, sale_end, draw_date, output_path) -> str:
+    """ジャンボ宝くじの無料記事用カバー（ハロウィン寄りの配色）"""
+    top, bottom, accent = (92, 32, 12), (26, 8, 20), (255, 176, 59)
+    img = Image.new("RGB", (WIDTH, HEIGHT))
+    draw_ctx = ImageDraw.Draw(img)
+    for y in range(HEIGHT):
+        t = y / HEIGHT
+        draw_ctx.line([(0, y), (WIDTH, y)], fill=tuple(int(a * (1 - t) + b * t) for a, b in zip(top, bottom)))
+
+    rng = random.Random(31)
+    star_font = _font(34, bold=True)
+    for _ in range(14):
+        x, y = rng.randint(900, 1230), rng.randint(70, 520)
+        draw_ctx.text((x, y), "★", font=star_font, fill=accent, anchor="mm")
+
+    draw_ctx.text((70, 140), name, font=_font(72, bold=True), fill=(255, 255, 255), anchor="lm")
+    draw_ctx.text((74, 250), "買うならこの日", font=_font(84, bold=True), fill=accent, anchor="lm")
+    draw_ctx.text((74, 350), "暦でえらぶ吉日カレンダー", font=_font(40), fill=(255, 255, 255), anchor="lm")
+    draw_ctx.text(
+        (74, 420),
+        f"発売 〜{sale_end.month}/{sale_end.day}　抽せん {draw_date.month}/{draw_date.day}",
+        font=_font(38, bold=True), fill=(255, 255, 255), anchor="lm",
+    )
+
+    draw_ctx.rectangle([0, HEIGHT - 92, WIDTH, HEIGHT], fill=(0, 0, 0))
+    draw_ctx.rectangle([0, HEIGHT - 96, WIDTH, HEIGHT - 92], fill=accent)
+    draw_ctx.text((WIDTH // 2, HEIGHT - 46), f"統計×暦モデル {MODEL_NAME}", font=_font(34, bold=True), fill=accent, anchor="mm")
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(output_path)
+    return str(output_path)
+
+
 def generate_intro_cover(output_path) -> str:
     """無料の紹介記事用カバー"""
     top, bottom, accent = (26, 42, 88), (8, 12, 32), (255, 214, 140)
