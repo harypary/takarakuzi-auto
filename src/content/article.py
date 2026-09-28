@@ -4,11 +4,12 @@ note のエディタにはプレーンテキストで貼り付けるため、表
 データの一覧には必ず読み解きの文章を添え、数字の羅列だけにならないようにする。
 """
 
+import json
 from collections import Counter
 from dataclasses import dataclass
 
 from src.analysis.numbers import pattern_of
-from src.config import FEATURE_LABELS, FEATURE_SHORT, FEATURES, MODEL_NAME, PICK_TIERS, Series
+from src.config import DATA_DIR, FEATURE_LABELS, FEATURE_SHORT, FEATURES, MODEL_NAME, PICK_TIERS, Series
 from src.content import commentary
 from src.content.compliance import DISCLAIMER
 from src.utils.dates import md_wd, ymd_ja
@@ -53,6 +54,17 @@ def _result(game, r: dict) -> str:
 
 def _weights_line(weights: dict) -> str:
     return "／".join(f"{FEATURE_SHORT[f]} {weights[f] * 100:.1f}%" for f in FEATURES)
+
+
+def _intro_link() -> list:
+    """無料の紹介記事への導線（投稿済みの場合だけ入れる）"""
+    path = DATA_DIR / "intro_post.json"
+    if not path.exists():
+        return []
+    url = json.loads(path.read_text(encoding="utf-8")).get("url")
+    if not url:
+        return []
+    return ["", "▼ このノートの読み方・6つの分析軸・毎週の検証のしかた（無料記事）", url]
 
 
 def _koyomi_lines(ko: dict) -> list:
@@ -337,6 +349,7 @@ def build_teaser(series: Series, ctxs: list, narr: dict) -> str:
 
     P += [_h("有料部分の見どころ"), commentary.paid_highlight(series.key, ctxs), ""]
     P += _contents(series)
+    P += _intro_link()
     P += ["", DISCLAIMER]
     return "\n".join(P)
 
