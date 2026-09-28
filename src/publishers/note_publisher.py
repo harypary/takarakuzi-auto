@@ -9,6 +9,7 @@ import os
 import random
 import re
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Optional
 
@@ -69,15 +70,9 @@ def persist_session(state: dict) -> None:
 class NotePublisher:
     """note.com への有料記事自動投稿（セッション方式）"""
 
-    def publish_article(
-        self,
-        title: str,
-        teaser_content: str,
-        paid_content: str,
-        price: int,
-        cover_image_path: Optional[str] = None,
-        hashtags: Optional[list] = None,
-    ) -> str:
+    @contextmanager
+    def _page(self):
+        """ログイン済みのページを用意する（失敗時はスクリーンショットを残す）"""
         storage_state = self._load_session()
         with sync_playwright() as p:
             browser: Browser = p.chromium.launch(
@@ -86,10 +81,7 @@ class NotePublisher:
             )
             context: BrowserContext = browser.new_context(
                 viewport={"width": 1280, "height": 900},
-                user_agent=(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                ),
+                user_agent=USER_AGENT,
                 permissions=["clipboard-read", "clipboard-write"],
                 storage_state=storage_state,
             )
@@ -98,9 +90,7 @@ class NotePublisher:
             page.on("dialog", lambda dialog: dialog.accept())
             try:
                 self._verify_session(page)
-                return self._create_paid_article(
-                    page, title, teaser_content, paid_content, price, cover_image_path, hashtags or []
-                )
+                yield page
             except Exception:
                 shot = OUTPUT_DIR / "logs" / f"publish_error_{int(time.time())}.png"
                 try:
@@ -111,6 +101,60 @@ class NotePublisher:
                 raise
             finally:
                 browser.close()
+
+    def publish_article(
+        self,
+        title: str,
+        teaser_content: str,
+        paid_content: str,
+        price: int,
+        cover_image_path: Optional[str] = None,
+        hashtags: Optional[list] = None,
+    ) -> str:
+        with self._page() as page:
+            return self._create_paid_article(
+                page, title, teaser_content, paid_content, price, cover_image_path, hashtags or []
+            )
+
+    def publish_free_article(
+        self,
+        title: str,
+        content: str,
+        cover_image_path: Optional[str] = None,
+        hashtags: Optional[list] = None,
+    ) -> str:
+        """有料エリアも価格も設定しない無料記事を投稿する"""
+        with self._page() as page:
+            logger.info(f"無料記事作成開始: {title}")
+            page.goto(NOTE_NEW_ARTICLE_URL, wait_until="networkidle")
+            _wait(3)
+            self._fill_title(page, title)
+            _wait(1)
+            if cover_image_path and Path(cover_image_path).exists():
+                self._upload_cover(page, cover_image_path)
+                _wait(3)
+            self._paste(page, content)
+            _wait(2)
+            page.click('button:has-text("公開に進む")', timeout=8000)
+            _wait(4)
+            if hashtags:
+                self._set_hashtags(page, hashtags)
+                _wait(1)
+            page.click('button:has-text("投稿する")', timeout=8000)
+            _wait(8)
+
+            match = re.search(r"notes/(n[0-9a-z]+)", page.url)
+            if not match:
+                raise RuntimeError(f"投稿後のURLから記事IDを取得できません: {page.url}")
+            key = match.group(1)
+            data = page.request.get(f"{NOTE_BASE_URL}/api/v3/notes/{key}").json().get("data") or {}
+            public_url = f"{NOTE_BASE_URL}/{(data.get('user') or {}).get('urlname')}/n/{key}"
+            if data.get("status") != "published":
+                raise RuntimeError(f"記事が公開状態になっていません（status={data.get('status')}）: {public_url}")
+            if data.get("price"):
+                raise RuntimeError(f"無料記事のはずが価格が設定されています（{data.get('price')}円）: {public_url}")
+            logger.info(f"無料記事の投稿完了: {public_url}")
+            return public_url
 
     def _load_session(self) -> dict:
         state = session_store.load_encrypted()
