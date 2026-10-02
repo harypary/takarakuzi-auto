@@ -30,9 +30,21 @@ def _font(size: int, bold: bool = False):
     return ImageFont.load_default()
 
 
-def generate_column_cover(output_path) -> str:
-    """無料コラム用カバー"""
-    top, bottom, accent = (16, 70, 66), (6, 22, 24), (140, 240, 200)
+COLUMN_COVERS = {
+    "myths": (("よくある誤解を", "データで確かめる"), "連番は出にくい？ 前回の数字は消す？",
+              (16, 70, 66), (6, 22, 24), (140, 240, 200)),
+    "report": (("直近1か月の", "出目レポート"), "いま来ている数字と、出ていない数字",
+               (18, 52, 110), (6, 16, 40), (150, 205, 255)),
+    "koyomi": (("宝くじを買うなら", "この日"), "天赦日・一粒万倍日・大安の暦カレンダー",
+               (88, 36, 120), (24, 10, 44), (235, 196, 255)),
+    "performance": (("予想の成績を", "すべて公開します"), "当たりも外れも、検証の記録",
+                    (120, 56, 16), (36, 16, 6), (255, 196, 120)),
+}
+
+
+def generate_column_cover(output_path, topic: str = "myths") -> str:
+    """無料コラム用カバー（種類ごとに配色と文言を変える）"""
+    lines, subtitle, top, bottom, accent = COLUMN_COVERS[topic]
     img = Image.new("RGB", (WIDTH, HEIGHT))
     draw_ctx = ImageDraw.Draw(img)
     for y in range(HEIGHT):
@@ -46,10 +58,10 @@ def generate_column_cover(output_path) -> str:
         h = rng.randint(60, 300)
         draw_ctx.rectangle([x, 470 - h, x + 28, 470], outline=accent, width=3)
 
-    draw_ctx.text((70, 150), "よくある誤解を", font=_font(70, bold=True), fill=(255, 255, 255), anchor="lm")
-    draw_ctx.text((70, 245), "データで確かめる", font=_font(70, bold=True), fill=accent, anchor="lm")
-    draw_ctx.text((74, 350), "連番は出にくい？ 前回の数字は消す？", font=_font(36), fill=(255, 255, 255), anchor="lm")
-    draw_ctx.text((74, 420), "ロト6 / ロト7 / ナンバーズ3・4 の全データ集計", font=_font(34), fill=(255, 255, 255), anchor="lm")
+    draw_ctx.text((70, 150), lines[0], font=_font(70, bold=True), fill=(255, 255, 255), anchor="lm")
+    draw_ctx.text((70, 245), lines[1], font=_font(70, bold=True), fill=accent, anchor="lm")
+    draw_ctx.text((74, 350), subtitle, font=_font(36), fill=(255, 255, 255), anchor="lm")
+    draw_ctx.text((74, 420), "ロト6 / ロト7 / ナンバーズ3・4", font=_font(34), fill=(255, 255, 255), anchor="lm")
 
     draw_ctx.rectangle([0, HEIGHT - 92, WIDTH, HEIGHT], fill=(0, 0, 0))
     draw_ctx.rectangle([0, HEIGHT - 96, WIDTH, HEIGHT - 92], fill=accent)
