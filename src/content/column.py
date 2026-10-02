@@ -1,22 +1,24 @@
 """無料コラム（週1回）の組み立て
 
 同じ記事の使い回しにならないよう、4種類を持ち回りにする。どれも実データから毎回作り直す。
-  myths       よくある誤解をデータで確かめる
-  report      直近1か月の出目レポート
-  koyomi      これからの暦カレンダー（吉日と抽せん日）
-  performance 予想の成績ふりかえり（正直な検証）
+  myths   よくある誤解をデータで確かめる
+  report  直近1か月の出目レポート
+  koyomi  これからの暦カレンダー（吉日と抽せん日）
+
+※ 当せん実績の掲載は購入を煽る表現と受け取られうるため、成績の公開は各予想記事の
+   「先週の回顧」に限っている（コラムでは扱わない）。
 """
 
 from datetime import date, timedelta
 
-from src.config import FEATURE_LABELS, FEATURES, GAMES, MODEL_NAME, SERIES
+from src.config import GAMES, MODEL_NAME, SERIES
 from src.content.article import _h, _intro_link
 from src.content.commentary import LUCKY_DETAIL, SEASON
 from src.content.compliance import DISCLAIMER
 from src.koyomi import koyomi
 from src.utils.dates import is_draw_day, md_wd, to_date, ymd_ja
 
-TOPICS = ("myths", "report", "koyomi", "performance")
+TOPICS = ("myths", "report", "koyomi")
 COOLDOWN_DAYS = 21
 
 BASE_HASHTAGS = ["宝くじ", "宝くじ予想", "データ分析", "数字選択式宝くじ", "note"]
@@ -232,64 +234,7 @@ def build_koyomi(ctx: dict) -> tuple:
     return title, "\n".join(_closing(P)), BASE_HASHTAGS + ["開運", "一粒万倍日", "天赦日", "暦"]
 
 
-# ───────────────────────── 4. 成績ふりかえり ─────────────────────────
-
-def build_performance(ctx: dict) -> tuple:
-    perf, today = ctx["performance"], ctx["today"]
-    title = f"【成績公開】予想{perf['total_draws']}回ぶんの検証結果を、当たりも外れもすべて出します【無料・{MODEL_NAME}】"
-
-    P = [
-        "予想を売っているアカウントの多くは、当たった回だけを見せます。このノートは逆で、"
-        "外れた回も含めて全部の検証を公開しています。",
-        "",
-        f"ここでは、これまでに投稿した予想{perf['total_draws']}回ぶんの結果をまとめました。",
-        "",
-        _h("これまでの結果"),
-    ]
-    for key, row in perf["games"].items():
-        game = GAMES[key]
-        P.append(f"■ {game.name}　検証した抽せん：{row['draws']}回（予想は毎回10通り）")
-        if row["prizes"]:
-            P.append("　当せん相当の内訳：" + "、".join(f"{k} {v}口" for k, v in row["prizes"].items()))
-        else:
-            P.append("　当せん相当：なし")
-        if game.kind == "loto":
-            P.append(f"　当せん数字との最大一致：{row['best']}個")
-        else:
-            P.append(f"　位置まで一致した桁の最大：{row['best']}桁")
-        P.append("")
-
-    P += [
-        "数字選択式宝くじの当せん確率はもともと低く、ロト6の1等は約600万分の1です。"
-        "10通りの予想を出したところで、その壁が動くわけではありません。この結果は、その現実をそのまま映しています。",
-        "",
-        _h("それでも検証を続ける理由"),
-        "毎回の抽せんのあと、6つの分析軸それぞれについて「偶然の期待値と比べて、どれだけ当せん数字を捉えられたか」を数えています。",
-        "",
-        "直近4週の集計は次のとおりです（数字が大きいほど、その見方が最近の出目に合っていたことを意味します）。",
-    ]
-    for f in FEATURES:
-        total = perf["axis"].get(f)
-        if not total or not total["baseline"]:
-            continue
-        ratio = total["hits"] / total["baseline"]
-        mark = "▲" if ratio >= 1.1 else ("▼" if ratio <= 0.9 else "―")
-        P.append(f"・{FEATURE_LABELS[f]}：{total['hits']}／偶然なら{total['baseline']:.1f}　{mark}")
-
-    P += [
-        "",
-        "この集計をもとに、毎週の重みを少しずつ動かしています。一度に大きく変えず、どの軸も5%〜40%の範囲に収めるのがルールです。",
-        "",
-        _h("この記録の意味"),
-        "分析をしても当せん確率は上がりません。それは最初から変わりません。",
-        "",
-        "このノートがやっているのは、「どんな根拠で数字を選んだのか」を毎回残し、結果と突き合わせて記録を積むことです。"
-        "当たった回だけを見せる使い方はしません。その姿勢ごと受け取ってもらえたらうれしいです。",
-    ]
-    return title, "\n".join(_closing(P)), BASE_HASHTAGS + ["検証", "ロト予想", "ナンバーズ予想"]
-
-
-BUILDERS = {"myths": build_myths, "report": build_report, "koyomi": build_koyomi, "performance": build_performance}
+BUILDERS = {"myths": build_myths, "report": build_report, "koyomi": build_koyomi}
 
 
 def build(topic: str, ctx: dict) -> tuple:

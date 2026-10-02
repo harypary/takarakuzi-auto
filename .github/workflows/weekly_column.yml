@@ -1,6 +1,6 @@
 name: 無料コラム 投稿（毎週日曜 夕方〜21時台）
 
-# 4種類（よくある誤解／出目レポート／暦カレンダー／成績ふりかえり）を持ち回りで投稿する。
+# 3種類（よくある誤解／出目レポート／暦カレンダー）を持ち回りで投稿する。
 # 定時実行は実測で約7時間遅れるため、21時台に出るよう 14:07 JST(05:07 UTC) に予約する。
 
 on:
@@ -16,7 +16,7 @@ on:
       topic:
         description: '種類（省略時は自動で持ち回り）'
         type: choice
-        options: ['', 'myths', 'report', 'koyomi', 'performance']
+        options: ['', 'myths', 'report', 'koyomi']
         default: ''
 
 permissions:

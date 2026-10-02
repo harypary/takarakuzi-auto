@@ -8,7 +8,6 @@
 import argparse
 import json
 import sys
-from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -19,12 +18,10 @@ load_dotenv()
 
 from src.analysis.loto import analyze_loto
 from src.analysis.numbers import analyze_numbers
-from src.config import DATA_DIR, FEATURES, GAMES, OUTPUT_DIR, PREDICTIONS_DIR
+from src.config import DATA_DIR, GAMES, OUTPUT_DIR
 from src.content.column import TOPICS, build, choose_topic
 from src.content.compliance import assert_clean
 from src.data.fetcher import load_results, update_results
-from src.predict.checker import evaluate
-from src.predict.store import load_state
 from src.publishers.cover import generate_column_cover
 from src.utils.dates import now_jst
 from src.utils.logger import get_logger
@@ -32,38 +29,6 @@ from src.utils.logger import get_logger
 logger = get_logger("post_column")
 RECORD = DATA_DIR / "column_posts.json"
 GAME_KEYS = ("loto6", "loto7", "numbers4", "numbers3")
-
-
-def _performance() -> dict:
-    """投稿済みの予想を結果と照合した集計と、直近4週の分析軸の成績"""
-    games, total_draws = {}, 0
-    for key in GAME_KEYS:
-        game = GAMES[key]
-        results = {r["draw"]: r for r in load_results(game)}
-        prizes, best, draws = Counter(), 0, 0
-        for path in sorted((PREDICTIONS_DIR / key).glob("*.json")):
-            saved = json.loads(path.read_text(encoding="utf-8"))
-            result = results.get(saved["draw"])
-            if not saved.get("post", {}).get("url") or not result:
-                continue
-            draws += 1
-            ev = evaluate(game, saved["picks"], result)
-            for row in ev["evals"]:
-                if row["prize"]:
-                    prizes[row["prize"]] += 1
-            best = max(best, ev["best"].get("matches", ev["best"].get("positions", 0)))
-        games[key] = {"draws": draws, "prizes": dict(prizes), "best": best}
-        total_draws += draws
-
-    axis = {f: {"hits": 0, "baseline": 0.0} for f in FEATURES}
-    for key in GAME_KEYS:
-        weeks = load_state(key).get("weeks", {})
-        for week in sorted(weeks)[-4:]:
-            for f in FEATURES:
-                total = weeks[week]["totals"][f]
-                axis[f]["hits"] += total["hits"]
-                axis[f]["baseline"] += total["baseline"]
-    return {"games": games, "total_draws": total_draws, "axis": axis}
 
 
 def main():
@@ -86,7 +51,6 @@ def main():
         "today": today,
         "loto": {k: analyze_loto(GAMES[k], load_results(GAMES[k])) for k in ("loto6", "loto7")},
         "numbers": {k: analyze_numbers(GAMES[k], load_results(GAMES[k])) for k in ("numbers4", "numbers3")},
-        "performance": _performance(),
     }
     title, body, hashtags = build(topic, ctx)
     assert_clean(title, body)
