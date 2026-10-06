@@ -23,12 +23,13 @@ from src.content.column import TOPICS, build, choose_topic
 from src.content.compliance import assert_clean
 from src.data.fetcher import load_results, update_results
 from src.publishers.cover import generate_column_cover
-from src.utils.dates import now_jst
+from src.utils.dates import now_jst, to_date
 from src.utils.logger import get_logger
 
 logger = get_logger("post_column")
 RECORD = DATA_DIR / "column_posts.json"
 GAME_KEYS = ("loto6", "loto7", "numbers4", "numbers3")
+MIN_INTERVAL_DAYS = 5  # 週1回なので、5日以内の再投稿はしない
 
 
 def main():
@@ -36,10 +37,19 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--topic", choices=TOPICS, help="省略時は直近に使っていない種類を自動で選ぶ")
     ap.add_argument("--no-fetch", action="store_true")
+    ap.add_argument("--force", action="store_true", help="同じ週にすでに投稿していても投稿する")
     args = ap.parse_args()
 
     today = now_jst().date()
     history = json.loads(RECORD.read_text(encoding="utf-8")) if RECORD.exists() else []
+
+    # 予備の実行で2本目を出さないよう、同じ週に投稿済みならスキップする
+    if history and not args.force and not args.dry_run:
+        last = to_date(history[-1]["posted_at"][:10])
+        if (today - last).days < MIN_INTERVAL_DAYS:
+            logger.info(f"{last} にコラムを投稿済みのためスキップします（--force で投稿）")
+            return
+
     topic = args.topic or choose_topic(today, history)
     logger.info(f"今回のコラム: {topic}")
 
