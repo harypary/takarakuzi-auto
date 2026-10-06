@@ -1,0 +1,189 @@
+{
+ "game": "loto6",
+ "draw": 2144,
+ "date": "2026-10-08",
+ "weights": {
+  "hot": 0.2079,
+  "trend": 0.1456,
+  "cold": 0.2289,
+  "carry": 0.082,
+  "slide": 0.1373,
+  "koyomi": 0.1983
+ },
+ "koyomi": {
+  "date": "2026-10-08",
+  "month": 10,
+  "day": 8,
+  "mmdd": "1008",
+  "kanshi": "乙卯",
+  "kyusei": 6,
+  "kyusei_name": "六白金星",
+  "kyusei_gogyo": "金",
+  "day_gogyo": "木",
+  "relation": "相剋",
+  "relation_text": "五行がぶつかり合う、波のある配置",
+  "rokuyo": "大安",
+  "setsu_month_name": "戌月（寒露〜）",
+  "lucky_days": [],
+  "numerology": 1,
+  "numerology_root": 1,
+  "lucky_digits": [
+   1,
+   3,
+   6,
+   8
+  ]
+ },
+ "picks": [
+  {
+   "tier": "本命",
+   "numbers": [
+    6,
+    9,
+    28,
+    35,
+    41,
+    43
+   ],
+   "score": 0.488,
+   "sum": 162,
+   "odd": 4
+  },
+  {
+   "tier": "本命",
+   "numbers": [
+    6,
+    20,
+    28,
+    30,
+    41,
+    42
+   ],
+   "score": 0.4792,
+   "sum": 167,
+   "odd": 1
+  },
+  {
+   "tier": "本命",
+   "numbers": [
+    6,
+    17,
+    30,
+    33,
+    41,
+    43
+   ],
+   "score": 0.4573,
+   "sum": 170,
+   "odd": 4
+  },
+  {
+   "tier": "本命",
+   "numbers": [
+    6,
+    9,
+    19,
+    28,
+    33,
+    42
+   ],
+   "score": 0.4517,
+   "sum": 137,
+   "odd": 3
+  },
+  {
+   "tier": "対抗",
+   "numbers": [
+    1,
+    6,
+    28,
+    33,
+    37,
+    43
+   ],
+   "score": 0.453,
+   "sum": 148,
+   "odd": 4
+  },
+  {
+   "tier": "対抗",
+   "numbers": [
+    2,
+    18,
+    28,
+    33,
+    41,
+    43
+   ],
+   "score": 0.4229,
+   "sum": 165,
+   "odd": 3
+  },
+  {
+   "tier": "対抗",
+   "numbers": [
+    9,
+    12,
+    30,
+    33,
+    41,
+    42
+   ],
+   "score": 0.4084,
+   "sum": 167,
+   "odd": 3
+  },
+  {
+   "tier": "穴",
+   "numbers": [
+    12,
+    18,
+    25,
+    30,
+    35,
+    42
+   ],
+   "score": 0.4856,
+   "sum": 162,
+   "odd": 2
+  },
+  {
+   "tier": "穴",
+   "numbers": [
+    5,
+    17,
+    18,
+    27,
+    30,
+    42
+   ],
+   "score": 0.4753,
+   "sum": 139,
+   "odd": 3
+  },
+  {
+   "tier": "穴",
+   "numbers": [
+    9,
+    12,
+    18,
+    27,
+    35,
+    43
+   ],
+   "score": 0.429,
+   "sum": 144,
+   "odd": 4
+  }
+ ],
+ "axis": [
+  6,
+  28,
+  41
+ ],
+ "post": {
+  "series": "loto6",
+  "url": "https://note.com/takarakuziuranai/n/n4b0d0912ed15",
+  "posted_at": "2026-10-06T21:00:07+09:00"
+ }
+}
