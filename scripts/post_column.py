@@ -32,6 +32,14 @@ GAME_KEYS = ("loto6", "loto7", "numbers4", "numbers3")
 MIN_INTERVAL_DAYS = 5  # 週1回なので、5日以内の再投稿はしない
 
 
+def posted_recently(history: list, today) -> bool:
+    """直近 MIN_INTERVAL_DAYS 日以内にコラムを投稿していれば True"""
+    if not history:
+        return False
+    last = max(to_date(post["posted_at"][:10]) for post in history)
+    return (today - last).days < MIN_INTERVAL_DAYS
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
@@ -44,11 +52,9 @@ def main():
     history = json.loads(RECORD.read_text(encoding="utf-8")) if RECORD.exists() else []
 
     # 予備の実行で2本目を出さないよう、同じ週に投稿済みならスキップする
-    if history and not args.force and not args.dry_run:
-        last = to_date(history[-1]["posted_at"][:10])
-        if (today - last).days < MIN_INTERVAL_DAYS:
-            logger.info(f"{last} にコラムを投稿済みのためスキップします（--force で投稿）")
-            return
+    if not args.dry_run and not args.force and posted_recently(history, today):
+        logger.info(f"直近{MIN_INTERVAL_DAYS}日以内にコラムを投稿済みのためスキップします（--force で投稿）")
+        return
 
     topic = args.topic or choose_topic(today, history)
     logger.info(f"今回のコラム: {topic}")
