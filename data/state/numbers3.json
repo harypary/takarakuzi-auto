@@ -795,6 +795,205 @@
     "slide": 0.1517,
     "koyomi": 0.163
    }
+  },
+  "2026-10-12": {
+   "week_start": "2026-10-12",
+   "review_start": "2026-10-05",
+   "review_end": "2026-10-11",
+   "draws": [
+    {
+     "draw": 7085,
+     "date": "2026-10-05",
+     "perf": {
+      "hot": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "trend": {
+       "hits": 2,
+       "baseline": 0.9
+      },
+      "cold": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "carry": {
+       "hits": 3,
+       "baseline": 0.9
+      },
+      "slide": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "koyomi": {
+       "hits": 2,
+       "baseline": 0.9
+      }
+     }
+    },
+    {
+     "draw": 7086,
+     "date": "2026-10-06",
+     "perf": {
+      "hot": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "trend": {
+       "hits": 2,
+       "baseline": 0.9
+      },
+      "cold": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "carry": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "slide": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "koyomi": {
+       "hits": 1,
+       "baseline": 0.9
+      }
+     }
+    },
+    {
+     "draw": 7087,
+     "date": "2026-10-07",
+     "perf": {
+      "hot": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "trend": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "cold": {
+       "hits": 2,
+       "baseline": 0.9
+      },
+      "carry": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "slide": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "koyomi": {
+       "hits": 0,
+       "baseline": 0.9
+      }
+     }
+    },
+    {
+     "draw": 7088,
+     "date": "2026-10-08",
+     "perf": {
+      "hot": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "trend": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "cold": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "carry": {
+       "hits": 2,
+       "baseline": 0.9
+      },
+      "slide": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "koyomi": {
+       "hits": 1,
+       "baseline": 0.9
+      }
+     }
+    },
+    {
+     "draw": 7089,
+     "date": "2026-10-09",
+     "perf": {
+      "hot": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "trend": {
+       "hits": 1,
+       "baseline": 0.9
+      },
+      "cold": {
+       "hits": 2,
+       "baseline": 0.9
+      },
+      "carry": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "slide": {
+       "hits": 0,
+       "baseline": 0.9
+      },
+      "koyomi": {
+       "hits": 0,
+       "baseline": 0.9
+      }
+     }
+    }
+   ],
+   "totals": {
+    "hot": {
+     "hits": 3,
+     "baseline": 4.5
+    },
+    "trend": {
+     "hits": 6,
+     "baseline": 4.5
+    },
+    "cold": {
+     "hits": 6,
+     "baseline": 4.5
+    },
+    "carry": {
+     "hits": 7,
+     "baseline": 4.5
+    },
+    "slide": {
+     "hits": 3,
+     "baseline": 4.5
+    },
+    "koyomi": {
+     "hits": 4,
+     "baseline": 4.5
+    }
+   },
+   "before": {
+    "hot": 0.2327,
+    "trend": 0.2113,
+    "cold": 0.1356,
+    "carry": 0.1058,
+    "slide": 0.1517,
+    "koyomi": 0.163
+   },
+   "after": {
+    "hot": 0.1995,
+    "trend": 0.2365,
+    "cold": 0.1518,
+    "carry": 0.1294,
+    "slide": 0.1301,
+    "koyomi": 0.1527
+   }
   }
  }
 }
