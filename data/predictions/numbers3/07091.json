@@ -1,0 +1,138 @@
+{
+ "game": "numbers3",
+ "draw": 7091,
+ "date": "2026-10-13",
+ "weights": {
+  "hot": 0.1995,
+  "trend": 0.2365,
+  "cold": 0.1518,
+  "carry": 0.1294,
+  "slide": 0.1301,
+  "koyomi": 0.1527
+ },
+ "koyomi": {
+  "date": "2026-10-13",
+  "month": 10,
+  "day": 13,
+  "mmdd": "1013",
+  "kanshi": "庚申",
+  "kyusei": 1,
+  "kyusei_name": "一白水星",
+  "kyusei_gogyo": "水",
+  "day_gogyo": "金",
+  "relation": "相生",
+  "relation_text": "日の金が星の水を生む、力が外へ広がる配置",
+  "rokuyo": "大安",
+  "setsu_month_name": "戌月（寒露〜）",
+  "lucky_days": [],
+  "numerology": 6,
+  "numerology_root": 6,
+  "lucky_digits": [
+   1,
+   4,
+   6,
+   9
+  ]
+ },
+ "picks": [
+  {
+   "tier": "本命",
+   "number": "189",
+   "score": 0.6566,
+   "pattern": "シングル",
+   "sum": 18,
+   "buy": "ストレート＋ミニ"
+  },
+  {
+   "tier": "本命",
+   "number": "219",
+   "score": 0.6537,
+   "pattern": "シングル",
+   "sum": 12,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "本命",
+   "number": "286",
+   "score": 0.6449,
+   "pattern": "シングル",
+   "sum": 16,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "本命",
+   "number": "162",
+   "score": 0.6374,
+   "pattern": "シングル",
+   "sum": 9,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "対抗",
+   "number": "916",
+   "score": 0.6356,
+   "pattern": "シングル",
+   "sum": 16,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "対抗",
+   "number": "106",
+   "score": 0.6235,
+   "pattern": "シングル",
+   "sum": 7,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "対抗",
+   "number": "869",
+   "score": 0.5914,
+   "pattern": "シングル",
+   "sum": 23,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "穴",
+   "number": "264",
+   "score": 0.61,
+   "pattern": "シングル",
+   "sum": 12,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "穴",
+   "number": "251",
+   "score": 0.5847,
+   "pattern": "シングル",
+   "sum": 8,
+   "buy": "セット（ボックス6通り）"
+  },
+  {
+   "tier": "穴",
+   "number": "203",
+   "score": 0.5696,
+   "pattern": "シングル",
+   "sum": 5,
+   "buy": "セット（ボックス6通り）"
+  }
+ ],
+ "axis": [
+  [
+   1,
+   2
+  ],
+  [
+   1,
+   8
+  ],
+  [
+   9,
+   6
+  ]
+ ],
+ "post": {
+  "series": "numbers",
+  "url": "https://note.com/takarakuziuranai/n/n03370691a9ce",
+  "posted_at": "2026-10-12T22:40:30+09:00"
+ }
+}
