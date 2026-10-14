@@ -315,6 +315,85 @@
     "slide": 0.122,
     "koyomi": 0.2042
    }
+  },
+  "2026-10-12": {
+   "week_start": "2026-10-12",
+   "review_start": "2026-10-05",
+   "review_end": "2026-10-11",
+   "draws": [
+    {
+     "draw": 698,
+     "date": "2026-10-09",
+     "perf": {
+      "hot": {
+       "hits": 4,
+       "baseline": 2.649
+      },
+      "trend": {
+       "hits": 3,
+       "baseline": 2.649
+      },
+      "cold": {
+       "hits": 2,
+       "baseline": 2.649
+      },
+      "carry": {
+       "hits": 3,
+       "baseline": 2.649
+      },
+      "slide": {
+       "hits": 3,
+       "baseline": 2.649
+      },
+      "koyomi": {
+       "hits": 1,
+       "baseline": 2.649
+      }
+     }
+    }
+   ],
+   "totals": {
+    "hot": {
+     "hits": 4,
+     "baseline": 2.649
+    },
+    "trend": {
+     "hits": 3,
+     "baseline": 2.649
+    },
+    "cold": {
+     "hits": 2,
+     "baseline": 2.649
+    },
+    "carry": {
+     "hits": 3,
+     "baseline": 2.649
+    },
+    "slide": {
+     "hits": 3,
+     "baseline": 2.649
+    },
+    "koyomi": {
+     "hits": 1,
+     "baseline": 2.649
+    }
+   },
+   "before": {
+    "hot": 0.2236,
+    "trend": 0.138,
+    "cold": 0.2096,
+    "carry": 0.1026,
+    "slide": 0.122,
+    "koyomi": 0.2042
+   },
+   "after": {
+    "hot": 0.2331,
+    "trend": 0.1396,
+    "cold": 0.2057,
+    "carry": 0.1038,
+    "slide": 0.1234,
+    "koyomi": 0.1944
+   }
   }
  }
 }
