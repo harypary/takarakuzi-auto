@@ -1,0 +1,27 @@
+name: 12星座の恋愛運ランキング 投稿（火・金 夕方〜21時台・500円）
+
+on:
+  schedule:
+    - cron: '7 05 * * 2,5'
+    - cron: '17 07 * * 2,5'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（生成のみ・投稿しない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: love-summary
+  cancel-in-progress: false
+
+jobs:
+  post:
+    uses: ./.github/workflows/_love.yml
+    with:
+      product: summary
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit

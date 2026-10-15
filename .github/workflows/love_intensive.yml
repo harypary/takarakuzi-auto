@@ -1,0 +1,28 @@
+name: 2週間の恋愛集中鑑定 投稿（隔週木曜・1,980円×12本）
+
+on:
+  schedule:
+    # 隔週の判定はスクリプト側（対象期間の ISO 週番号が偶数のときだけ投稿）
+    - cron: '7 05 * * 4'
+    - cron: '17 07 * * 4'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（生成のみ・投稿しない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: love-intensive
+  cancel-in-progress: false
+
+jobs:
+  post:
+    uses: ./.github/workflows/_love.yml
+    with:
+      product: intensive
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit
