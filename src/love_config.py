@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-BRAND = "ふたりの星図"  # 記事タイトル末尾に入る名前。アカウント名に合わせて変更する
-NOTE_URLNAME = ""  # 新しい note アカウントの ID（例: koi_hoshi）。セッション設定後に記入
+BRAND = "恋の星読み"  # 記事タイトル末尾とカバーに入る名前（表示名: 恋の星読み｜12星座の恋愛占い）
+NOTE_URLNAME = "koi_hoshiyomi"  # note アカウントの ID（https://note.com/koi_hoshiyomi）
 
 
 @dataclass(frozen=True)
