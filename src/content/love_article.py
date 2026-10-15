@@ -11,6 +11,9 @@
 from dataclasses import dataclass
 
 from src.astro.signs import ZODIAC_SIGNS, compat_comment, compat_score
+from src.content.love_sections import (ROKUYO_TIME, approach_by_partner, charm_section, day_details,
+                                       element_advice, faq_section, message_examples, moon_rituals,
+                                       ng_actions, roadmap, signals_and_waiting, weekly_work)
 from src.utils.dates import md_wd, ymd_ja
 
 SEP = "━━━━━━━━━━━━━━━━━━"
@@ -103,11 +106,14 @@ def build_weekly(data: dict, brand: str, narr: dict) -> Article:
         f"・{sign['name']}の恋のかたち：{sign['love_style']}",
         "",
         _h("この先で読めること"),
-        "・7日間すべての恋愛運（星の数・六曜・九星・月の満ち欠け）",
-        "・恋が動く日ベスト2と、その日の過ごし方",
-        "・気をつけたい日と、言葉の選び方",
-        "・今週あなたと響き合う星座ベスト3と、接し方",
+        "・7日間すべての恋愛運を1日ずつ解説（星の数・暦・月の満ち欠け・その日の動き方）",
+        "・恋が動く日ベスト2と、その日に起きやすいこと",
+        "・気をつけたい日と、避けたいNG行動3つ",
+        "・今週あなたと響き合う星座ベスト3",
+        "・相手の星座別アプローチ（12星座すべて）",
         "・片思い／交際中／復縁、それぞれの動き方",
+        "・新月・満月の使い方（願いごと・手放しの文例つき）",
+        "・今週の書き出しワーク",
         f"・{theme['label']}へのアドバイス",
         "・今週の行動プラン（行動・言葉・色・持ちもの・場所）",
         "",
@@ -127,16 +133,26 @@ def build_weekly(data: dict, brand: str, narr: dict) -> Article:
     for rank, day in enumerate(best, 1):
         paid.append(f"■ {rank}位　{ymd_ja(day['date'])}　{STARS[day['score']]}（{day['ko']['rokuyo']}・{day['phase']}）")
         paid.append(f"　理由：{'／'.join(day['reasons']) if day['reasons'] else '暦が穏やかに整う日です'}")
-    paid += ["", narr["best_days"], "", _h("気をつけたい日"),
-             f"{ymd_ja(caution['date'])}　{STARS[caution['score']]}（{caution['ko']['rokuyo']}）",
-             f"理由：{'／'.join(caution['reasons']) if caution['reasons'] else '暦の巡りが少し重たい日です'}",
-             "この日は返事を急がないこと。言葉が強くなりやすいので、送る前に一度読み返してみてください。",
-             "", _h("今週あなたと響き合う星座 ベスト3")]
+    paid += ["", narr["best_days"],
+             "", _h("1日ずつの読み解き")] + day_details(data) + [
+        _h("気をつけたい日"),
+        f"{ymd_ja(caution['date'])}　{STARS[caution['score']]}（{caution['ko']['rokuyo']}）",
+        f"理由：{'／'.join(caution['reasons']) if caution['reasons'] else '暦の巡りが少し重たい日です'}",
+        "この日は返事を急がないこと。言葉が強くなりやすいので、送る前に一度読み返してみてください。",
+        ""] + ng_actions(data) + [
+        "", _h("今週あなたと響き合う星座 ベスト3")]
     for rank, row in enumerate(data["compat"], 1):
         paid += [f"■ {rank}位　{row['sign']['name']}（相性 {STARS[row['score']]}）", f"　{row['comment']}"]
-    paid += ["", narr["compat_note"], "", _h("立場別の動き方"), narr["scenes"],
-             "", _h(f"今週のもうひとつのテーマ：{theme['label']}"), narr["sub_theme"],
-             "", _h("月のリズムを味方に")] + _moon_lines(data) + [
+    paid += ["", narr["compat_note"],
+             "", _h("相手の星座別アプローチ")] + approach_by_partner(sign) + [
+        "", _h("立場別の動き方"), narr["scenes"],
+        "", _h("そのまま使える連絡の文例")] + message_examples(data) + [
+        "", _h("脈ありサインと、連絡が来ないとき")] + signals_and_waiting(data) + [
+        "", _h("あなたの魅力の活かし方")] + charm_section(data) + [
+        "", _h("よくいただく質問")] + faq_section(data) + [
+        "", _h("新月・満月の使い方")] + moon_rituals(data) + [
+        _h("今週の書き出しワーク")] + weekly_work(data) + [
+        "", _h(f"今週のもうひとつのテーマ：{theme['label']}"), narr["sub_theme"],
         "", _h("今週の行動プラン")] + _lucky_lines(data) + [
         f"・動く日：{md_wd(best[0]['date'])}、{md_wd(best[1]['date'])}",
         f"・整える日：{md_wd(caution['date'])}",
@@ -196,13 +212,27 @@ def build_intensive(data: dict, brand: str, narr: dict) -> Article:
         paid += [f"■ {rank}位　{ymd_ja(day['date'])}　{STARS[day['score']]}（{day['ko']['rokuyo']}・{day['phase']}）",
                  f"　理由：{'／'.join(day['reasons']) if day['reasons'] else '暦が穏やかに整う日です'}",
                  f"　起きやすいこと：{hint}"]
-    paid += ["", narr["best_days"], "", _h("立場別の動き方"), narr["scenes"],
-             "", _h("12星座すべてとの相性")]
+    paid += ["", narr["best_days"],
+             "", _h("2週間の見取り図")] + roadmap(data) + [
+        "", _h("1日ずつの読み解き（14日間）")] + day_details(data) + [
+        _h("気をつけたい日と、避けたいこと"),
+        f"{ymd_ja(data['caution_day']['date'])}　{STARS[data['caution_day']['score']]}"
+        f"（{data['caution_day']['ko']['rokuyo']}）",
+        ""] + ng_actions(data) + [
+        "", _h("立場別の動き方"), narr["scenes"],
+        "", _h("そのまま使える連絡の文例")] + message_examples(data) + [
+        "", _h("脈ありサインと、連絡が来ないとき")] + signals_and_waiting(data) + [
+        "", _h("あなたの魅力の活かし方")] + charm_section(data) + [
+        "", _h("よくいただく質問")] + faq_section(data) + [
+        "", _h("12星座すべてとの相性")]
     for other in sorted(ZODIAC_SIGNS, key=lambda s: (-compat_score(sign, s), s["en"])):
         if other["en"] == sign["en"]:
             continue
         paid.append(f"・{other['name']}（{STARS[compat_score(sign, other)]}）{compat_comment(sign, other)}")
-    paid += ["", narr["compat_note"], "", _h("月のリズムを味方に")] + _moon_lines(data) + [
+    paid += ["", narr["compat_note"],
+             "", _h("相手の星座別アプローチ")] + approach_by_partner(sign) + [
+        "", _h("新月・満月の使い方")] + moon_rituals(data) + [
+        _h("2週間の書き出しワーク")] + weekly_work(data) + [
         "", _h(f"もうひとつのテーマ：{theme['label']}"), narr["sub_theme"],
         "", _h("2週間の行動プラン")] + _lucky_lines(data) + [
         f"・動く日：{md_wd(ranked[0]['date'])}、{md_wd(ranked[1]['date'])}、{md_wd(ranked[2]['date'])}",
@@ -242,14 +272,39 @@ def build_summary(rows: list, start, end, brand: str, narr: dict) -> Article:
     for rank, row in enumerate(rows, 1):
         sign = row["sign"]
         best = row["best_days"][0]
+        caution = row["caution_day"]
         paid += [
-            f"{rank}位　{sign['name']}　{STARS[round(row['average'])]}",
+            f"{rank}位　{sign['name']}（{sign['period']}生まれ）　{STARS[round(row['average'])]}",
             f"　キーワード：{'、'.join(row['keywords'])}",
-            f"　恋が動く日：{md_wd(best['date'])}（{best['ko']['rokuyo']}）",
-            f"　ひとこと：{row['action']}と良い流れになります。{sign['love_style']}",
+            f"　恋が動く日：{md_wd(best['date'])}（{best['ko']['rokuyo']}）"
+            f"／気をつけたい日：{md_wd(caution['date'])}（{caution['ko']['rokuyo']}）",
+            f"　この期間は、{row['action']}と流れに乗れます。{sign['love_style']}",
+            f"　{sign['name']}の魅力は{'と'.join(sign['keywords'][:2])}。恋愛では「{sign['love_keywords'][0]}」として表れます。"
+            "うまくいかない日があっても、それは相性の問題ではなく巡りの問題です。",
+            f"　相性が良いのは{'、'.join(c['sign']['name'] for c in row['compat'])}。"
+            f"　口にすると良い言葉：「{row['lucky_word']}」／ラッキーカラー：{row['color']}／"
+            f"縁がつながる場所：{row['place']}",
             "",
         ]
-    paid += [narr["flow"], "", _h("この期間の暦と月")] + _moon_lines(rows[0]) + [
+    paid += [narr["flow"], "", _h("この期間の日別の暦")]
+    for day in rows[0]["days"]:
+        ko = day["ko"]
+        lucky = f"／{'・'.join(ko['lucky_days'])}" if ko["lucky_days"] else ""
+        paid.append(f"■ {md_wd(day['date'])}　{ko['rokuyo']}／{ko['kyusei_name']}／月は{day['phase']}{lucky}")
+        paid.append(f"　{ROKUYO_TIME[ko['rokuyo']]}。")
+    paid += ["", _h("上位3星座をもう少しくわしく")]
+    for rank, row in enumerate(rows[:3], 1):
+        sign = row["sign"]
+        paid += [
+            f"■ {rank}位　{sign['name']}　{STARS[round(row['average'])]}",
+            f"　{sign['love_style']}",
+            f"　この期間は「{'、'.join(row['keywords'])}」がテーマ。{row['action']}と流れに乗れます。",
+            f"　相性が良いのは{'、'.join(c['sign']['name'] for c in row['compat'])}。",
+            f"　口にすると良い言葉：「{row['lucky_word']}」／ラッキーカラー：{row['color']}",
+            "",
+        ]
+    paid += [_h("エレメント別の過ごし方")] + element_advice() + [
+        _h("この期間の暦と月")] + _moon_lines(rows[0]) + [
         "",
         _h(f"もうひとつのテーマ：{theme['label']}"),
         f"{theme['lead']}について、迷いが出やすい期間です。恋愛も{theme['advice_focus']}も、根っこは「自分がどうしたいか」。"
