@@ -34,7 +34,8 @@ from src.utils.logger import get_logger
 
 logger = get_logger("run_love")
 RECORD = DATA_DIR / "love_posts.json"
-HEADLINES = {"weekly": "週間恋愛運", "intensive": "2週間の恋愛集中鑑定", "summary": "12星座の恋愛運"}
+HEADLINES = {"daily": "今日の恋愛運", "weekly": "週間恋愛運",
+             "intensive": "2週間の恋愛集中鑑定", "summary": "12星座の恋愛運"}
 
 
 def load_record() -> list:
@@ -48,6 +49,10 @@ def save_record(record: list) -> None:
 
 def period_for(product_key: str, today: date) -> tuple:
     """商品ごとの対象期間"""
+    if product_key == "daily":
+        # 夕方に投稿して、翌日の運勢を届ける
+        start = today + timedelta(days=1)
+        return start, start
     if product_key == "weekly":
         # 日曜に翌週分を出す（月曜に実行した場合はその週）
         start = week_start(today + timedelta(days=1))

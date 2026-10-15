@@ -16,6 +16,10 @@ logger = get_logger("love_narrator")
 
 # 商品ごとに必要なパーツと、目標の文字数（下限, 上限）
 SPECS = {
+    "daily": {
+        "intro": (220, 380), "flow": (260, 420), "best_days": (260, 420),
+        "scenes": (550, 900), "compat_note": (220, 380), "sub_theme": (260, 420), "closing": (220, 380),
+    },
     "weekly": {
         "intro": (260, 420), "flow": (320, 520), "best_days": (320, 520),
         "scenes": (650, 1000), "compat_note": (260, 420), "sub_theme": (320, 520), "closing": (260, 420),
@@ -91,7 +95,7 @@ def _fallback_weeklyish(product: str, data: dict) -> dict:
     best, second = data["best_days"][0], data["best_days"][-1]
     caution = data["caution_day"]
     rng = _rng(data, product)
-    span = "この2週間" if product == "intensive" else "この一週間"
+    span = {"intensive": "この2週間", "daily": "この日", "weekly": "この一週間"}.get(product, "この一週間")
 
     intro = (
         f"{sign['name']}のあなたへ。{sign['love_style']}\n\n"

@@ -11,9 +11,11 @@
 from dataclasses import dataclass
 
 from src.astro.signs import ZODIAC_SIGNS, compat_comment, compat_score
-from src.content.love_deep import (arc_section, key_day_section, partner_shift_section, pitfall_section,
-                                   question_section, theme_section, words_section)
-from src.content.love_sections import (ROKUYO_TIME, day_details, element_advice, moon_rituals, roadmap)
+from src.content.love_deep import (SIGN_DEEP, arc_section, bad_phrase_section, choice_section,
+                                   evening_review, key_day_section, partner_shift_section,
+                                   pitfall_section, question_section, theme_section, words_section)
+from src.content.love_sections import (MOON_ADVICE, ROKUYO_TIME, day_details, element_advice,
+                                       moon_rituals, roadmap)
 from src.utils.dates import md_wd, ymd_ja
 
 SEP = "━━━━━━━━━━━━━━━━━━"
@@ -87,6 +89,91 @@ def _lucky_lines(data: dict) -> list:
 
 def _hashtags(sign: dict) -> list:
     return [sign["name"], "恋愛", "恋愛運", "占い", "星座占い", "恋愛占い", "12星座", "運勢", "開運", "恋"]
+
+
+# ───────────────────────── 300円・毎日 ─────────────────────────
+
+def build_daily(data: dict, brand: str, narr: dict) -> Article:
+    sign, theme = data["sign"], data["sub_theme"]
+    deep = SIGN_DEEP[sign["en"]]
+    day = data["days"][0]
+    ko = day["ko"]
+    date_text = ymd_ja(day["date"])
+    title = f"【{sign['name']}】{md_wd(day['date'])}の恋愛運｜「{data['keywords'][0]}」の日【{brand}】"
+
+    teaser = "\n".join([
+        f"{sign['name']}のあなたへ。{deep['core'].split('。')[0]}。",
+        "",
+        f"{date_text}の恋愛運は{STARS[day['score']]}（{day['label']}）。"
+        f"六曜は{ko['rokuyo']}、日の九星は{ko['kyusei_name']}、月は{day['phase']}です。"
+        + (f"さらに{'・'.join(ko['lucky_days'])}が重なります。" if ko["lucky_days"] else ""),
+        "",
+        f"今日のテーマは「{data['keywords'][0]}」。{ROKUYO_TIME[ko['rokuyo']]}。",
+        "",
+        _h("この先で読めること"),
+        "・今日あなたに流れているもの（暦から読む、今日の意味）",
+        "・朝・昼・夜、それぞれの過ごし方",
+        "・相手の気持ちと、反応の読み方",
+        f"・{sign['name']}が今日つまずきやすいところ",
+        "・相手に届く言葉（文例と、なぜ効くのか）",
+        "・片思い／交際中／復縁、それぞれの動き方",
+        "・今日の行動プランと、ひとつの問い",
+        "",
+        DISCLAIMER,
+    ])
+
+    paid = [_h(f"{date_text}、{sign['name']}に流れているもの"), deep["core"], "",
+            f"その{sign['name']}にとって、今日は「{data['keywords'][0]}」が主題になる一日です。",
+            f"恋愛運は{STARS[day['score']]}。"
+            + ("追い風です。動くなら今日がその日です。" if day["score"] >= 4 else
+               "凪の日です。無理に動かず、整えるほうが得るものがあります。" if day["score"] == 3 else
+               "向かい風です。今日は自分を労わる日にあててください。"),
+            "",
+            f"理由は暦にあります。{'／'.join(day['reasons']) if day['reasons'] else '日の巡りが穏やかに整っています'}。"
+            f"日の干支は{ko['kanshi']}、五行は{ko['day_gogyo']}。"
+            f"{sign['element']}のエレメントを持つ{sign['name']}との関係で、今日の流れが決まります。",
+            "", deep["desire"],
+            "それを思い出しておくと、今日のやりとりに振り回されにくくなります。",
+            "", _h("今日の暦を読む"),
+            f"・六曜：{ko['rokuyo']}　{ROKUYO_TIME[ko['rokuyo']]}",
+            f"・九星（日盤）：{ko['kyusei_name']}",
+            f"・干支：{ko['kanshi']}（五行は{ko['day_gogyo']}）",
+            f"・月：{day['phase']}　{MOON_ADVICE.get(day['phase'], '')}",
+            f"・暦注の吉日：{'・'.join(ko['lucky_days']) if ko['lucky_days'] else 'なし'}",
+            "",
+            "暦は、その日の空気の質を教えてくれます。良し悪しではなく、"
+            "「押すのに向く日か、待つのに向く日か」を知るための目安だと考えてください。",
+            "", _h("朝・昼・夜の過ごし方")] + key_day_section(data) + [
+        "", _h("相手の気持ちと、反応の読み方"),
+        f"今日のあなたは、{deep['words'].split('。')[0]}。その前提で相手を見てみてください。",
+        "",
+        "■ 相手の反応をどう読むか",
+        "　・返事が短い　→　気持ちの問題ではなく、状況の問題であることが多いです",
+        "　・返事が遅い　→　考えてから返したい相手ほど遅くなります。雑に扱われているわけではありません",
+        "　・質問が返ってくる　→　会話を続けたい意思表示です。素直に答えてください",
+        "　・予定を聞かれる　→　もっとも分かりやすい好意のサインです",
+        "",
+        f"{sign['name']}のあなたは、{deep['pitfall'].split('。')[0]}という癖があります。"
+        "今日その癖が出そうになったら、一度深呼吸して、相手の立場を想像してみてください。",
+        "", _h(f"{sign['name']}が今日つまずきやすいところ"),
+        deep["pitfall"], "",
+        "■ 抜け方", f"　{deep['escape']}", "",
+        "■ 無理をしているサイン", f"　{deep['strain']}",
+        "　当てはまったら、今日は恋愛から少し離れて、自分の生活を整えるほうを優先してください。",
+        "", _h("相手に届く言葉")] + words_section(data) + [
+        "", _h("今日あなたと響き合う星座")]
+    for rank, row in enumerate(data["compat"], 1):
+        paid += [f"■ {rank}位　{row['sign']['name']}（相性 {STARS[row['score']]}）", f"　{row['comment']}"]
+    paid += ["", narr["compat_note"],
+             "", _h("動く・待つ・整える、どれを選ぶか")] + choice_section(data) + [
+        "", _h("つい言ってしまう一言")] + bad_phrase_section(data) + [
+        "", _h("立場別の動き方"), narr["scenes"],
+        "", _h(f"今日のもうひとつのテーマ：{theme['label']}"), narr["sub_theme"],
+        "", _h("今日の行動プラン")] + _lucky_lines(data) + [
+        "", _h("夜の振り返り")] + evening_review(data) + [
+        "", _h("今日の問い")] + question_section(data) + [
+        "", _h("今日のあなたへ"), narr["closing"], "", DISCLAIMER]
+    return Article(title, teaser, "\n".join(paid), _hashtags(sign))
 
 
 # ───────────────────────── 980円・週間 ─────────────────────────

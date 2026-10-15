@@ -11,7 +11,7 @@ from src.content.love_narrator import narrate
 
 START, END = date(2026, 10, 19), date(2026, 10, 25)
 # 12.uranai の実測（300円で有料5,250字、1,980円で9,000字）に合わせた下限
-MIN_PAID = {"summary": 4500, "weekly": 6500, "intensive": 9000}
+MIN_PAID = {"daily": 4500, "summary": 4500, "weekly": 6500, "intensive": 9000}
 # 日本語・英数字・記号以外（キリル文字やハングルなど）が紛れていないか
 FOREIGN = re.compile(r"[Ѐ-ӿ가-힯؀-ۿ]")
 
@@ -22,20 +22,21 @@ def _article(product: str, sign_en: str = "libra"):
         rows = all_signs_data(START, START)
         return love_article.build_summary(rows, START, START, "恋の星読み",
                                           narrate("summary", rows=rows, start=START, end=START))
-    end = END if product == "weekly" else date(2026, 11, 1)
+    end = {"daily": START, "weekly": END}.get(product, date(2026, 11, 1))
     data = period_data(sign, START, end)
-    builder = love_article.build_weekly if product == "weekly" else love_article.build_intensive
+    builder = {"daily": love_article.build_daily, "weekly": love_article.build_weekly,
+               "intensive": love_article.build_intensive}[product]
     return builder(data, "恋の星読み", narrate(product, data=data))
 
 
-@pytest.mark.parametrize("product", ["summary", "weekly", "intensive"])
+@pytest.mark.parametrize("product", ["daily", "summary", "weekly", "intensive"])
 def test_paid_length_matches_price(product):
     article = _article(product)
     assert len(article.paid) >= MIN_PAID[product], f"{product}: 有料部分が短い（{len(article.paid)}字）"
     assert 300 <= len(article.teaser) <= 1200
 
 
-@pytest.mark.parametrize("product", ["summary", "weekly", "intensive"])
+@pytest.mark.parametrize("product", ["daily", "summary", "weekly", "intensive"])
 def test_no_foreign_characters_or_ng_words(product):
     article = _article(product)
     whole = f"{article.title}\n{article.teaser}\n{article.paid}"

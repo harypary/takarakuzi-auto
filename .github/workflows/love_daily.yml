@@ -1,0 +1,28 @@
+name: 今日の恋愛運 投稿（毎日 夕方〜21時台・翌日分・300円×12本）
+
+on:
+  schedule:
+    # GitHub の定時実行は実測で5〜7時間遅れる。21時台に出るよう 14:07 JST(05:07 UTC) に予約する。
+    - cron: '7 05 * * *'
+    - cron: '17 07 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（生成のみ・投稿しない）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: love-daily
+  cancel-in-progress: false
+
+jobs:
+  post:
+    uses: ./.github/workflows/_love.yml
+    with:
+      product: daily
+      dry_run: ${{ inputs.dry_run == true }}
+    secrets: inherit

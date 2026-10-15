@@ -17,6 +17,7 @@ class Product:
 
 
 PRODUCTS = {
+    "daily": Product("daily", "今日の恋愛運", 300, True, 1, "build_daily"),
     "weekly": Product("weekly", "週間恋愛運", 980, True, 7, "build_weekly"),
     "intensive": Product("intensive", "2週間の恋愛集中鑑定", 1980, True, 14, "build_intensive"),
     "summary": Product("summary", "12星座の恋愛運ランキング", 500, False, 3, "build_summary"),
