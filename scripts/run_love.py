@@ -104,7 +104,7 @@ def main():
         article = love_article.build_summary(rows, start, end, BRAND, narr)
         targets.append((None, article))
 
-    posted = 0
+    posted, failed = 0, []
     for index, (sign, article) in enumerate(targets):
         sign_en = sign["en"] if sign else "all"
         assert_clean(article.title, article.teaser, article.paid)
@@ -133,10 +133,18 @@ def main():
 
         from src.publishers.note_publisher import NotePublisher
 
-        url = NotePublisher().publish_article(
-            title=article.title, teaser_content=article.teaser, paid_content=article.paid,
-            price=product.price, cover_image_path=cover, hashtags=article.hashtags,
-        )
+        try:
+            url = NotePublisher().publish_article(
+                title=article.title, teaser_content=article.teaser, paid_content=article.paid,
+                price=product.price, cover_image_path=cover, hashtags=article.hashtags,
+            )
+        except Exception as e:
+            # 1本失敗しても残りの星座は続ける（あとで --force なしの再実行で埋められる）
+            failed.append(sign_en)
+            logger.error(f"[{index + 1}/{len(targets)}] 投稿失敗（{sign_en}）: {str(e).splitlines()[0][:160]}")
+            if index < len(targets) - 1:
+                time.sleep(POST_INTERVAL)
+            continue
         record.append({"product": product.key, "period_start": start.isoformat(), "sign": sign_en,
                        "price": product.price, "url": url, "posted_at": now_jst().isoformat(timespec="seconds")})
         save_record(record)
@@ -149,6 +157,9 @@ def main():
         logger.info(f"dry-run のため投稿しません（{len(targets)}本を生成）")
     else:
         logger.info(f"=== 完了: {posted}本を投稿 ===")
+        if failed:
+            logger.error(f"投稿できなかった星座: {'、'.join(failed)}（同じコマンドで再実行すると未投稿分だけ投稿します）")
+            sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -215,9 +215,36 @@ class NotePublisher:
         _wait(4)
 
         page.click('button:has-text("投稿する")', timeout=8000)
-        _wait(8)
+        self._wait_until_published(page)
 
         return self._verify_published(page, anchor)
+
+    def _wait_until_published(self, page: Page, timeout: int = 90):
+        """「投稿する」を押したあと、公開が確定するまで待つ（note 側の処理が遅れることがある）"""
+        match = re.search(r"notes/(n[0-9a-z]+)", page.url)
+        if not match:
+            _wait(8)
+            return
+        key = match.group(1)
+        deadline = time.time() + timeout
+        retried = False
+        while time.time() < deadline:
+            _wait(5)
+            try:
+                data = page.request.get(f"{NOTE_BASE_URL}/api/v3/notes/{key}").json().get("data") or {}
+            except Exception:
+                continue
+            if data.get("status") == "published":
+                return
+            if not retried and time.time() > deadline - timeout / 2:
+                # 押し損ねていた場合に備えて一度だけ押し直す
+                try:
+                    page.click('button:has-text("投稿する")', timeout=5000)
+                    logger.warning("公開が確定しないため「投稿する」を押し直しました")
+                except Exception:
+                    pass
+                retried = True
+        logger.warning("公開の確定を確認できないまま待機時間を過ぎました")
 
     def _verify_published(self, page: Page, anchor: str) -> str:
         """公開後に API で状態と有料エリアの位置を確認し、公開URLを返す"""
