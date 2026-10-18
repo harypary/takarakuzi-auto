@@ -213,6 +213,11 @@ class NotePublisher:
 
         page.click('button:has-text("有料エリア設定")', timeout=8000)
         _wait(4)
+        try:
+            page.wait_for_load_state("networkidle", timeout=15000)
+        except Exception:
+            pass
+        _wait(2)
 
         page.click('button:has-text("投稿する")', timeout=8000)
         self._wait_until_published(page)
@@ -237,12 +242,19 @@ class NotePublisher:
             if data.get("status") == "published":
                 return
             if not retried and time.time() > deadline - timeout / 2:
-                # 押し損ねていた場合に備えて一度だけ押し直す
+                # 押し損ねや画面の固まりに備え、公開設定の画面を開き直して一度だけ押し直す
                 try:
-                    page.click('button:has-text("投稿する")', timeout=5000)
-                    logger.warning("公開が確定しないため「投稿する」を押し直しました")
-                except Exception:
-                    pass
+                    page.goto(f"https://editor.note.com/notes/{key}/publish/", wait_until="domcontentloaded",
+                              timeout=30000)
+                    try:
+                        page.wait_for_load_state("networkidle", timeout=15000)
+                    except Exception:
+                        pass
+                    _wait(3)
+                    page.click('button:has-text("投稿する")', timeout=10000)
+                    logger.warning("公開が確定しないため、画面を開き直して「投稿する」を押し直しました")
+                except Exception as e:
+                    logger.warning(f"押し直しに失敗しました: {str(e).splitlines()[0][:120]}")
                 retried = True
         logger.warning("公開の確定を確認できないまま待機時間を過ぎました")
 

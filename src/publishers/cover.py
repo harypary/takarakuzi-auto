@@ -23,6 +23,21 @@ _REGULAR = [
 ]
 
 
+_SYMBOL = [
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"),
+    Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+    Path("C:/Windows/Fonts/seguisym.ttf"),
+]
+
+
+def _symbol_font(size: int):
+    """星座記号（♈〜♓）用。日本語フォントには記号が入っていないことがあるため別に用意する"""
+    for path in _SYMBOL:
+        if path.exists():
+            return ImageFont.truetype(str(path), size)
+    return _font(size, bold=True)
+
+
 def _font(size: int, bold: bool = False):
     for path in _BOLD if bold else _REGULAR:
         if path.exists():
@@ -66,7 +81,7 @@ def generate_sign_cover(sign: dict, headline: str, period_text: str, output_path
         x, y = rng.randint(820, WIDTH - 20), rng.randint(30, HEIGHT - 120)
         r = rng.choice([1, 1, 2, 3])
         draw_ctx.ellipse([x - r, y - r, x + r, y + r], fill=(255, 255, 255))
-    draw_ctx.text((1040, 230), sign["symbol"], font=_font(260, bold=True), fill=accent, anchor="mm")
+    draw_ctx.text((1040, 230), sign["symbol"], font=_symbol_font(260), fill=accent, anchor="mm")
 
     draw_ctx.text((70, 130), sign["name"], font=_font(96, bold=True), fill=(255, 255, 255), anchor="lm")
     draw_ctx.text((74, 245), headline, font=_font(56, bold=True), fill=accent, anchor="lm")
@@ -86,12 +101,13 @@ def generate_ranking_cover(headline: str, period_text: str, output_path) -> str:
     draw_ctx = ImageDraw.Draw(img)
     _gradient(draw_ctx, (58, 26, 96), (16, 8, 32))
 
-    symbol_font = _font(44, bold=True)
+    symbol_font = _symbol_font(44)
     for i, sign in enumerate(ZODIAC_SIGNS):
         draw_ctx.text((900 + (i % 3) * 120, 90 + (i // 3) * 115), sign["symbol"], font=symbol_font,
                       fill=accent, anchor="mm")
 
-    draw_ctx.text((70, 150), headline, font=_font(76, bold=True), fill=(255, 255, 255), anchor="lm")
+    # 右側の星座記号（x=860〜）に重ならない大きさ
+    draw_ctx.text((70, 150), headline, font=_font(56, bold=True), fill=(255, 255, 255), anchor="lm")
     draw_ctx.text((74, 270), period_text, font=_font(44), fill=accent, anchor="lm")
     draw_ctx.text((74, 360), "12星座すべての恋愛運を占いました", font=_font(36), fill=(255, 255, 255), anchor="lm")
     _footer(draw_ctx, accent)

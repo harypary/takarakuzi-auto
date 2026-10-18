@@ -33,18 +33,30 @@ from src.utils.dates import base_date, now_jst, week_start
 from src.utils.logger import get_logger
 
 logger = get_logger("run_love")
-RECORD = DATA_DIR / "love_posts.json"
+LEGACY_RECORD = DATA_DIR / "love_posts.json"
+
+
+def record_path(product_key: str):
+    """投稿記録は商品ごとに別ファイル（同時に動く別商品の実行と、コミット時に記録を消し合わないため）"""
+    return DATA_DIR / f"love_posts_{product_key}.json"
 HEADLINES = {"daily": "今日の恋愛運", "weekly": "週間恋愛運",
              "intensive": "2週間の恋愛集中鑑定", "summary": "12星座の恋愛運"}
 
 
-def load_record() -> list:
-    return json.loads(RECORD.read_text(encoding="utf-8")) if RECORD.exists() else []
+def load_record(product_key: str) -> list:
+    path = record_path(product_key)
+    if path.exists():
+        return json.loads(path.read_text(encoding="utf-8"))
+    if LEGACY_RECORD.exists():  # 旧形式（全商品で1ファイル）からの移行
+        legacy = json.loads(LEGACY_RECORD.read_text(encoding="utf-8"))
+        return [r for r in legacy if r.get("product") == product_key]
+    return []
 
 
-def save_record(record: list) -> None:
-    RECORD.parent.mkdir(parents=True, exist_ok=True)
-    RECORD.write_text(json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
+def save_record(product_key: str, record: list) -> None:
+    path = record_path(product_key)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(record, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def period_for(product_key: str, today: date) -> tuple:
@@ -87,7 +99,7 @@ def main():
         logger.info(f"今週は隔週の対象外のためスキップします（ISO週 {start.isocalendar()[1]}）")
         return
 
-    record = load_record()
+    record = load_record(product.key)
     logger.info(f"=== {product.name}（{product.price}円）対象期間 {start} 〜 {end} ===")
 
     targets = []
@@ -147,7 +159,7 @@ def main():
             continue
         record.append({"product": product.key, "period_start": start.isoformat(), "sign": sign_en,
                        "price": product.price, "url": url, "posted_at": now_jst().isoformat(timespec="seconds")})
-        save_record(record)
+        save_record(product.key, record)
         posted += 1
         logger.info(f"[{index + 1}/{len(targets)}] 投稿完了: {url}")
         if index < len(targets) - 1:
