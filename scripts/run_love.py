@@ -151,12 +151,14 @@ def main():
                 price=product.price, cover_image_path=cover, hashtags=article.hashtags,
             )
         except Exception as e:
-            # 1本失敗しても残りの星座は続ける（あとで --force なしの再実行で埋められる）
+            # note は短時間の連続公開を制限するらしく、1本失敗すると後続も失敗して下書きが溜まる。
+            # そのため1本目の失敗で打ち切り、残りは約2時間後の予備の実行（未投稿分だけ投稿）に任せる。
             failed.append(sign_en)
+            failed += [t[0]["en"] for t in targets[index + 1:]
+                       if t[0] and not already_posted(record, product.key, start, t[0]["en"])]
             logger.error(f"[{index + 1}/{len(targets)}] 投稿失敗（{sign_en}）: {str(e).splitlines()[0][:160]}")
-            if index < len(targets) - 1:
-                time.sleep(POST_INTERVAL)
-            continue
+            logger.error("連続公開の制限にかかった可能性があるため、この回は打ち切ります")
+            break
         record.append({"product": product.key, "period_start": start.isoformat(), "sign": sign_en,
                        "price": product.price, "url": url, "posted_at": now_jst().isoformat(timespec="seconds")})
         save_record(product.key, record)
