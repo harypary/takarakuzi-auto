@@ -27,7 +27,7 @@ from src.config import DATA_DIR, OUTPUT_DIR
 from src.content import love_article
 from src.content.compliance import assert_clean
 from src.content.love_narrator import narrate
-from src.love_config import BRAND, POST_INTERVAL, PRODUCTS
+from src.love_config import BRAND, MAX_PUBLISH_PER_HOUR, NOTE_URLNAME, POST_INTERVAL, PRODUCTS
 from src.publishers.cover import generate_ranking_cover, generate_sign_cover
 from src.utils.dates import base_date, now_jst, week_start
 from src.utils.logger import get_logger
@@ -74,6 +74,39 @@ def period_for(product_key: str, today: date) -> tuple:
         return start, start + timedelta(days=13)
     start = today
     return start, start + timedelta(days=PRODUCTS["summary"].period_days - 1)
+
+
+def recent_publish_count(minutes: int = 60) -> int:
+    """直近 minutes 分にアカウント全体で公開した記事の数（商品をまたいで数える）"""
+    import urllib.request
+    from datetime import datetime
+
+    threshold = now_jst() - timedelta(minutes=minutes)
+    count = 0
+    # 一覧は1ページ数件ずつなので、期間より古い記事が出てくるまでページをたどる
+    for page in range(1, 6):
+        req = urllib.request.Request(
+            f"https://note.com/api/v2/creators/{NOTE_URLNAME}/contents?kind=note&page={page}",
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        try:
+            data = json.load(urllib.request.urlopen(req, timeout=30))["data"]
+        except Exception as e:
+            logger.warning(f"直近の公開数を取得できませんでした（制限の確認を省略）: {e}")
+            return count
+        rows = data.get("contents", [])
+        reached_old = False
+        for row in rows:
+            published = row.get("publishAt")
+            if not published:
+                continue
+            if datetime.fromisoformat(published) >= threshold:
+                count += 1
+            elif not row.get("isPinned"):  # 固定表示の記事は古くても先頭に来るので無視する
+                reached_old = True
+        if reached_old or data.get("isLastPage") or not rows:
+            break
+    return count
 
 
 def already_posted(record: list, product: str, start: date, sign_en: str) -> bool:
@@ -142,6 +175,14 @@ def main():
         if not args.force and already_posted(record, product.key, start, sign_en):
             logger.info(f"[{index + 1}/{len(targets)}] 投稿済みのためスキップ: {sign_en}")
             continue
+
+        recent = recent_publish_count()
+        if recent >= MAX_PUBLISH_PER_HOUR:
+            remaining = [t[0]["en"] if t[0] else "all" for t in targets[index:]
+                         if not already_posted(record, product.key, start, t[0]["en"] if t[0] else "all")]
+            logger.info(f"直近1時間に{recent}本公開済み（上限{MAX_PUBLISH_PER_HOUR}本）のため、この回は止めます。"
+                        f"残り{len(remaining)}本は次の実行で投稿します: {'、'.join(remaining)}")
+            break
 
         from src.publishers.note_publisher import NotePublisher
 
