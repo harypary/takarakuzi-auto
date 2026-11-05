@@ -1086,5 +1086,53 @@
   "price": 300,
   "url": "https://note.com/koi_hoshiyomi/n/n3ca2291b4fbc",
   "posted_at": "2026-11-05T22:18:50+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-06",
+  "sign": "libra",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n75d801b0968a",
+  "posted_at": "2026-11-06T00:32:13+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-06",
+  "sign": "scorpio",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n0f0ebd2da628",
+  "posted_at": "2026-11-06T00:35:06+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-06",
+  "sign": "sagittarius",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/ndb2e42c0a0fe",
+  "posted_at": "2026-11-06T00:38:01+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-06",
+  "sign": "capricorn",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/nbaaabc0b3c60",
+  "posted_at": "2026-11-06T00:40:56+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-06",
+  "sign": "aquarius",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/ned5406f35dac",
+  "posted_at": "2026-11-06T00:43:51+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-06",
+  "sign": "pisces",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/nd67a4e3a3d10",
+  "posted_at": "2026-11-06T00:46:45+09:00"
  }
 ]
