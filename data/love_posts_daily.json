@@ -1206,5 +1206,29 @@
   "price": 300,
   "url": "https://note.com/koi_hoshiyomi/n/nf85d93ad0971",
   "posted_at": "2026-11-07T00:22:41+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-07",
+  "sign": "capricorn",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/nabe47a460746",
+  "posted_at": "2026-11-07T01:52:33+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-07",
+  "sign": "aquarius",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n30912f3f2f8c",
+  "posted_at": "2026-11-07T01:55:28+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-07",
+  "sign": "pisces",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n462948b939de",
+  "posted_at": "2026-11-07T01:58:22+09:00"
  }
 ]
