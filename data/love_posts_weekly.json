@@ -190,5 +190,37 @@
   "price": 980,
   "url": "https://note.com/koi_hoshiyomi/n/n12064397b80a",
   "posted_at": "2026-11-02T02:05:38+09:00"
+ },
+ {
+  "product": "weekly",
+  "period_start": "2026-11-09",
+  "sign": "aries",
+  "price": 980,
+  "url": "https://note.com/koi_hoshiyomi/n/n55e81c8bd385",
+  "posted_at": "2026-11-14T00:23:23+09:00"
+ },
+ {
+  "product": "weekly",
+  "period_start": "2026-11-09",
+  "sign": "taurus",
+  "price": 980,
+  "url": "https://note.com/koi_hoshiyomi/n/n2c81d0614a75",
+  "posted_at": "2026-11-14T00:26:19+09:00"
+ },
+ {
+  "product": "weekly",
+  "period_start": "2026-11-09",
+  "sign": "gemini",
+  "price": 980,
+  "url": "https://note.com/koi_hoshiyomi/n/n1b7a32cf4f8e",
+  "posted_at": "2026-11-14T00:29:15+09:00"
+ },
+ {
+  "product": "weekly",
+  "period_start": "2026-11-09",
+  "sign": "cancer",
+  "price": 980,
+  "url": "https://note.com/koi_hoshiyomi/n/ne6508506c281",
+  "posted_at": "2026-11-14T00:32:09+09:00"
  }
 ]
