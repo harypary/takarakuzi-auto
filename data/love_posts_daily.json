@@ -1558,5 +1558,21 @@
   "price": 300,
   "url": "https://note.com/koi_hoshiyomi/n/n6d1c8f87defc",
   "posted_at": "2026-11-13T22:11:38+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-14",
+  "sign": "virgo",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/na22ca31a14cb",
+  "posted_at": "2026-11-14T00:27:54+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-14",
+  "sign": "libra",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n9a63a3f08329",
+  "posted_at": "2026-11-14T00:30:50+09:00"
  }
 ]
