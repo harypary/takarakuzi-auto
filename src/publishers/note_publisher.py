@@ -211,6 +211,9 @@ class NotePublisher:
         self._set_price(page, price)
         _wait(1)
 
+        self._disable_refund_requests(page)
+        _wait(1)
+
         page.click('button:has-text("有料エリア設定")', timeout=8000)
         _wait(4)
         try:
@@ -426,6 +429,33 @@ class NotePublisher:
         _wait(0.5)
         loc.press("Tab")
         logger.info(f"価格設定: {price}円")
+
+    def _disable_refund_requests(self, page: Page):
+        """「返金申請の受け付け」をOFFにする（12.uranai と同じ処理）。
+
+        初期値がONで、購入後に返金されると売上が消えるため、有料記事では必ず切る。
+        チェックボックスに id/name がないので、ラベルの文言からたどる。
+        """
+        result = page.evaluate("""() => {
+            const cbs = Array.from(document.querySelectorAll('input[type=checkbox]'));
+            const cb = cbs.find(c => {
+                let n = c.closest('label') || c.parentElement;
+                for (let i = 0; i < 4 && n; i++) {
+                    if ((n.textContent || '').includes('返金申請の受け付け')) return true;
+                    n = n.parentElement;
+                }
+                return false;
+            });
+            if (!cb) return 'not_found';
+            if (!cb.checked) return 'already_off';
+            cb.click();
+            return cb.checked ? 'still_on' : 'turned_off';
+        }""")
+        if result in ("turned_off", "already_off"):
+            logger.info(f"返金申請の受け付け: OFF（{result}）")
+        else:
+            # 返金ONのまま公開すると売上が消えうるので、公開せずに止める
+            raise RuntimeError(f"返金申請の受け付けをOFFにできませんでした（{result}）。公開を中止します")
 
     def _set_hashtags(self, page: Page, hashtags: list):
         try:

@@ -1,0 +1,81 @@
+name: 投稿スケジューラ（2時間おき・1日15本／1時間6本の枠で優先順に投稿）
+
+# 毎日（今日・明日分）→ ランキング → 週間 → 集中鑑定 の順に、出すべき記事を枠の範囲で少しずつ出す。
+# note の公開上限（1時間に6本・1日およそ16本）を超えないよう、投稿のたびに直近の公開数を数える。
+# 商品ごとのワークフロー（love_daily など）は手動実行用として残している。
+
+on:
+  schedule:
+    - cron: '7 */2 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run（予定と残り枠を表示するだけ）'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: love-scheduler
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      TZ: Asia/Tokyo
+      LOG_LEVEL: INFO
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - run: pip install -r requirements.txt
+
+      - name: Check plan
+        id: plan
+        run: |
+          python scripts/run_scheduler.py --dry-run | tee plan.log
+          if grep -q "今回 0本" plan.log; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Install Playwright and fonts
+        if: steps.plan.outputs.skip != 'true' && !inputs.dry_run
+        run: |
+          playwright install --with-deps chromium
+          sudo apt-get install -y fonts-noto-cjk fonts-dejavu-core
+
+      - name: Post
+        if: steps.plan.outputs.skip != 'true' && !inputs.dry_run
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SESSION_KEY: ${{ secrets.SESSION_KEY }}
+          NOTE_SESSION_B64: ${{ secrets.NOTE_SESSION_B64 }}
+        run: python scripts/run_scheduler.py
+
+      - name: Commit data
+        if: always() && !inputs.dry_run && steps.plan.outputs.skip != 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "data: scheduler $(date +%F_%H%M)"
+          for i in 1 2 3 4 5; do
+            if git pull --rebase -X theirs && git push; then exit 0; fi
+            git rebase --abort 2>/dev/null || true
+            sleep $((i * 10))
+          done
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.plan.outputs.skip != 'true'
+        with:
+          name: scheduler-${{ github.run_number }}
+          path: output/
+          retention-days: 7

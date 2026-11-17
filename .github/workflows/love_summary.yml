@@ -1,10 +1,7 @@
 name: 12星座の恋愛運ランキング 投稿（火・金 夕方〜21時台・500円）
 
 on:
-  schedule:
-    - cron: '7 05 * * 2,5'
-    - cron: '17 07 * * 2,5'
-    - cron: '27 09 * * 2,5'
+  # 定時実行は love_scheduler.yml に一本化した（1日の公開上限に収めるため）。ここは手動実行用
   workflow_dispatch:
     inputs:
       dry_run:
