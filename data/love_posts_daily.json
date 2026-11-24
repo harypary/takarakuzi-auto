@@ -2534,5 +2534,29 @@
   "price": 300,
   "url": "https://note.com/koi_hoshiyomi/n/n1a93e370f9c8",
   "posted_at": "2026-11-24T05:18:17+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-25",
+  "sign": "libra",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n595ce9f4859b",
+  "posted_at": "2026-11-24T13:57:31+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-25",
+  "sign": "scorpio",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n16130b26b8f9",
+  "posted_at": "2026-11-24T14:00:26+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-25",
+  "sign": "sagittarius",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/na58d5717f5c9",
+  "posted_at": "2026-11-24T14:03:21+09:00"
  }
 ]
