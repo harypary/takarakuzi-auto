@@ -2774,5 +2774,29 @@
   "price": 300,
   "url": "https://note.com/koi_hoshiyomi/n/n680e0d7fd40f",
   "posted_at": "2026-11-27T03:34:48+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-28",
+  "sign": "aries",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n27b5c72c71fc",
+  "posted_at": "2026-11-27T11:45:30+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-28",
+  "sign": "taurus",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/na8ae41d60a2c",
+  "posted_at": "2026-11-27T11:48:25+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-28",
+  "sign": "gemini",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/nf74ba474233f",
+  "posted_at": "2026-11-27T11:51:20+09:00"
  }
 ]
