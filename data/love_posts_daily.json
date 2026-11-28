@@ -2894,5 +2894,29 @@
   "price": 300,
   "url": "https://note.com/koi_hoshiyomi/n/n5d7cf122aad2",
   "posted_at": "2026-11-28T07:52:55+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-29",
+  "sign": "cancer",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/n60e64ada4718",
+  "posted_at": "2026-11-28T16:26:40+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-29",
+  "sign": "leo",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/nc70aaefc422b",
+  "posted_at": "2026-11-28T16:29:35+09:00"
+ },
+ {
+  "product": "daily",
+  "period_start": "2026-11-29",
+  "sign": "virgo",
+  "price": 300,
+  "url": "https://note.com/koi_hoshiyomi/n/nf80669fad566",
+  "posted_at": "2026-11-28T16:32:29+09:00"
  }
 ]
